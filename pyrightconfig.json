@@ -1,4 +1,10 @@
 {
     "reportUnusedCallResult": "none",
-    "reportUnannotatedClassAttribute": "none"
+    "reportUnannotatedClassAttribute": "none",
+    "reportImplicitRelativeImport": "none",
+    "reportAny": "none",
+    "reportUnknownMemberType": "none",
+    "reportUnknownParameterType": "none",
+    "reportImportCycles": "none",
+    "reportExplicitAny": "none"
 }
