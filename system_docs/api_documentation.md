@@ -2207,17 +2207,6 @@ curl "$BASE_URL/api/students/5/classes" \
 
 ---
 
-## Authentication (Future)
-
-Currently, the API does not require authentication. All endpoints are publicly accessible. In a production environment, you should implement:
-
-- JWT token authentication
-- Role-based access control (RBAC)
-- API rate limiting
-- HTTPS/TLS encryption
-
----
-
 ## Version History
 
 - **v1.0.0** (2025-12-11): Initial API documentation
