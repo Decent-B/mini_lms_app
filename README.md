@@ -19,6 +19,7 @@
 
 ---
 
+<a name="about-the-project"></a>
 ## 📖 About the Project
 
 **Mini LMS** is a small Learning Management System that provides a centralized platform for managing educational operations including:
@@ -32,6 +33,7 @@ This project serves as a test for my application at **TeenUp** - An EdTech compa
 
 ---
 
+<a name="architecture--design"></a>
 ## 🏗 Architecture & Design
 
 ### Use Case Diagram
@@ -61,6 +63,7 @@ The system uses a relational database design with proper normalization and forei
 
 ---
 
+<a name="tech-stack"></a>
 ## 🛠 Tech Stack
 
 ### Backend
@@ -85,6 +88,7 @@ The system uses a relational database design with proper normalization and forei
 
 ---
 
+<a name="project-structure"></a>
 ## 📁 Project Structure
 
 ```
@@ -136,6 +140,7 @@ mini_lms_app/
 
 ---
 
+<a name="key-features"></a>
 ## ✨ Key Features
 
 ### 🔐 Authentication & Authorization
@@ -189,6 +194,7 @@ mini_lms_app/
 
 ---
 
+<a name="getting-started"></a>
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -257,6 +263,7 @@ VITE_API_BASE_URL=http://localhost:8000/api
 
 ---
 
+<a name="running-the-application"></a>
 ## 🐳 Running the Application
 
 ### Start All Services
@@ -323,6 +330,7 @@ Once running, access the application at:
 
 ---
 
+<a name="testing-the-apis"></a>
 ## 🧪 Testing the APIs
 
 ### Using the Test Script
@@ -372,6 +380,7 @@ curl -X GET "http://localhost:8000/api/classes?day=Monday" \
 
 ---
 
+<a name="using-the-ui"></a>
 ## 🖥 Using the UI
 
 ### Login Screen
@@ -434,6 +443,7 @@ The system is seeded with test accounts for each role:
 
 ---
 
+<a name="test-data"></a>
 ## 📊 Test Data
 
 The database is automatically seeded with realistic test data on first startup:
@@ -456,6 +466,7 @@ All test accounts use the same password: `password123`
 - **25 Subscriptions** (students have 2-3 subscriptions each)
 - **101 Class Registrations** (no schedule conflicts per student)
 
+<a name="additional-documentation"></a>
 ## 📚 Additional Documentation
 
 For more detailed information, refer to:
@@ -468,18 +479,21 @@ For more detailed information, refer to:
 
 ---
 
+<a name="authors"></a>
 ## 👥 Authors
 
 **Binh Nguyen** - *Initial work*
 
 ---
 
+<a name="acknowledgments"></a>
 ## 🙏 Acknowledgments
 
 - Special thanks to the FastAPI and React communities
 
 ---
 
+<a name="support"></a>
 ## 📧 Support
 
 For questions or issues:
