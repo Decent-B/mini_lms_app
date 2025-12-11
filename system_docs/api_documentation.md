@@ -420,9 +420,178 @@ curl http://localhost:8000/api/students/1
 
 ---
 
+### 5. Get All Students
+
+**Endpoint:** `GET /api/students`
+
+**Description:** Retrieves a list of all students with their user and parent information.
+
+**Authentication:** Required (Bearer token)
+
+**Request Example:**
+```bash
+curl http://localhost:8000/api/students \
+  -H "Authorization: Bearer <access_token>"
+```
+
+**Response (200 OK):**
+```json
+[
+  {
+    "dob": "2010-03-15",
+    "gender": "Female",
+    "current_grade": "Grade 8",
+    "parent_id": 1,
+    "id": 1,
+    "user_id": 9,
+    "user": {
+      "name": "Emma Smith",
+      "email": "emma.smith@email.com",
+      "id": 9,
+      "role": "student"
+    }
+  },
+  {
+    "dob": "2011-07-22",
+    "gender": "Male",
+    "current_grade": "Grade 7",
+    "parent_id": 1,
+    "id": 2,
+    "user_id": 10,
+    "user": {
+      "name": "Oliver Smith",
+      "email": "oliver.smith@email.com",
+      "id": 10,
+      "role": "student"
+    }
+  }
+]
+```
+
+**Response Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| Array | array | List of student objects |
+| `id` | integer | Student record ID |
+| `user_id` | integer | Associated user record ID |
+| `parent_id` | integer \| null | Associated parent ID |
+| `dob` | string \| null | Date of birth (ISO format) |
+| `gender` | string \| null | Gender |
+| `current_grade` | string \| null | Current grade |
+| `user` | object | Nested user information |
+
+---
+
+### 6. Get Student Classes
+
+**Endpoint:** `GET /api/students/{student_id}/classes`
+
+**Description:** Retrieves all classes a student is registered for.
+
+**Authentication:** Required (Bearer token)
+
+**Path Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `student_id` | integer | Yes | The ID of the student |
+
+**Request Example:**
+```bash
+curl http://localhost:8000/api/students/1/classes \
+  -H "Authorization: Bearer <access_token>"
+```
+
+**Response (200 OK):**
+```json
+[
+  {
+    "id": 1,
+    "name": "Mathematics Fundamentals",
+    "subject": "Mathematics",
+    "day_of_week": "Monday",
+    "time_slot": "09:00-10:30",
+    "teacher_name": "Dr. Peterson",
+    "max_students": 15
+  },
+  {
+    "id": 6,
+    "name": "History & Culture",
+    "subject": "History",
+    "day_of_week": "Tuesday",
+    "time_slot": "11:00-12:30",
+    "teacher_name": "Mr. Thompson",
+    "max_students": 15
+  }
+]
+```
+
+**Response Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| Array | array | List of class objects the student is enrolled in |
+| `id` | integer | Class ID |
+| `name` | string | Class name |
+| `subject` | string \| null | Subject/topic |
+| `day_of_week` | string \| null | Day of week |
+| `time_slot` | string \| null | Time range (HH:MM-HH:MM) |
+| `teacher_name` | string \| null | Teacher's name |
+| `max_students` | integer \| null | Maximum enrollment capacity |
+
+**Error Responses:**
+
+| Status Code | Condition | Response Example |
+|-------------|-----------|------------------|
+| 404 | Student not found | `{"detail": "Student not found"}` |
+| 422 | Invalid ID format | `{"detail": [{"type": "int_parsing", "loc": ["path", "student_id"], "msg": "Input should be a valid integer"}]}` |
+
+---
+
+### 7. Delete Student
+
+**Endpoint:** `DELETE /api/students/{student_id}`
+
+**Description:** Deletes a student and their associated user account. Also removes all class registrations and subscriptions.
+
+**Authentication:** Required (Bearer token)
+
+**Path Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `student_id` | integer | Yes | The ID of the student to delete |
+
+**Request Example:**
+```bash
+curl -X DELETE http://localhost:8000/api/students/1 \
+  -H "Authorization: Bearer <access_token>"
+```
+
+**Response (204 No Content):**
+```
+(No response body)
+```
+
+**Error Responses:**
+
+| Status Code | Condition | Response Example |
+|-------------|-----------|------------------|
+| 404 | Student not found | `{"detail": "Student not found"}` |
+| 422 | Invalid ID format | `{"detail": [{"type": "int_parsing", "loc": ["path", "student_id"], "msg": "Input should be a valid integer"}]}` |
+
+**Important Notes:**
+- Deleting a student will cascade delete all associated class registrations
+- Deleting a student will cascade delete all associated subscriptions
+- The associated user account will also be deleted
+- This operation cannot be undone
+
+---
+
 ## Class Management APIs
 
-### 5. Create Class
+### 8. Create Class
 
 **Endpoint:** `POST /api/classes`
 

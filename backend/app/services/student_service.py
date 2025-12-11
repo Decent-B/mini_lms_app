@@ -11,6 +11,8 @@ from fastapi import HTTPException, status
 from app.models.student import Student
 from app.models.user import User, UserRole
 from app.models.parent import Parent
+from app.models.class_model import ClassModel
+from app.models.class_registration import ClassRegistration
 from app.schemas.student import StudentCreate
 from app.core.security import get_password_hash
 
@@ -101,3 +103,83 @@ def get_student_by_id(db: Session, student_id: int) -> Student:
         )
     
     return student
+
+
+def get_all_students(db: Session) -> list[Student]:
+    """
+    Get all students.
+    
+    Args:
+        db: Database session
+        
+    Returns:
+        List of all students with relationships loaded
+    """
+    students = db.query(Student).all()
+    return students
+
+
+def get_student_classes(db: Session, student_id: int) -> list[ClassModel]:
+    """
+    Get all classes a student is registered for.
+    
+    Args:
+        db: Database session
+        student_id: Student ID
+        
+    Returns:
+        List of classes the student is enrolled in
+        
+    Raises:
+        HTTPException: If student not found
+    """
+    # Verify student exists
+    student = db.query(Student).filter(Student.id == student_id).first()
+    if not student:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Student not found"
+        )
+    
+    # Get all classes through registrations
+    classes = (
+        db.query(ClassModel)
+        .join(ClassRegistration, ClassRegistration.class_id == ClassModel.id)
+        .filter(ClassRegistration.student_id == student_id)
+        .all()
+    )
+    
+    return classes
+
+
+def delete_student(db: Session, student_id: int) -> None:
+    """
+    Delete a student and their associated user account.
+    
+    Args:
+        db: Database session
+        student_id: Student ID
+        
+    Raises:
+        HTTPException: If student not found
+    """
+    student = db.query(Student).filter(Student.id == student_id).first()
+    
+    if not student:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Student not found"
+        )
+    
+    # Get the user_id before deleting student
+    user_id = student.user_id
+    
+    # Delete student (cascade will handle registrations and subscriptions)
+    db.delete(student)
+    
+    # Delete associated user account
+    user = db.query(User).filter(User.id == user_id).first()
+    if user:
+        db.delete(user)
+    
+    db.commit()
