@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
 import type { Student, Class, Subscription } from '../../types';
 
@@ -15,11 +17,18 @@ interface ClassWithPosition extends Class {
 }
 
 const StudentDashboard = () => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
   const [student, setStudent] = useState<Student | null>(null);
   const [classes, setClasses] = useState<Class[]>([]);
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   const weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
   const startHour = 8;
@@ -194,6 +203,12 @@ const StudentDashboard = () => {
               {student.gender && <div><span className="font-semibold">Gender:</span> {student.gender}</div>}
             </div>
           </div>
+          <button
+            onClick={handleLogout}
+            className="px-6 py-2 bg-white text-purple-600 rounded-lg shadow-lg hover:bg-purple-50 transition duration-300 transform hover:scale-105 font-semibold"
+          >
+            Logout
+          </button>
         </div>
       </div>
 

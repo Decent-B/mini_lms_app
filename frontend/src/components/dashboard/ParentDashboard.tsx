@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
 import type { Parent, Student, Class, Subscription } from '../../types';
 
@@ -19,12 +21,19 @@ interface ClassWithPosition extends Class {
 }
 
 const ParentDashboard = () => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
   const [parent, setParent] = useState<ParentWithChildren | null>(null);
   const [studentClasses, setStudentClasses] = useState<{ [key: number]: Class[] }>({});
   const [studentSubscriptions, setStudentSubscriptions] = useState<{ [key: number]: Subscription[] }>({});
   const [expandedStudentId, setExpandedStudentId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   const weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
   const startHour = 8;
@@ -197,6 +206,12 @@ const ParentDashboard = () => {
               <div><span className="font-semibold">Children:</span> {parent.students.length}</div>
             </div>
           </div>
+          <button
+            onClick={handleLogout}
+            className="px-6 py-2 bg-white text-blue-600 rounded-lg shadow-lg hover:bg-blue-50 transition duration-300 transform hover:scale-105 font-semibold"
+          >
+            Logout
+          </button>
         </div>
       </div>
 
