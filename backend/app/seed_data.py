@@ -148,8 +148,8 @@ def seed_database():
             db.flush()
             students.append(student)
         
-        # ===== CLASSES (20 total, distributed across weekdays) =====
-        print("  → Creating 20 classes across the week...")
+        # ===== CLASSES (27 total, including 7 with overlapping time slots) =====
+        print("  → Creating 27 classes across the week...")
         
         weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] # pyright: ignore[reportUnusedVariable]
         classes_data = [
@@ -182,6 +182,15 @@ def seed_database():
             {"name": "Economics Basics", "subject": "Economics", "day": "Friday", "time": "11:00-12:30", "teacher": "Mr. Thompson", "max_students": 15},
             {"name": "Robotics Club", "subject": "Computer Science", "day": "Friday", "time": "14:00-15:30", "teacher": "Dr. Lee", "max_students": 10},
             {"name": "Photography", "subject": "Art", "day": "Friday", "time": "16:00-17:30", "teacher": "Ms. Garcia", "max_students": 12},
+            
+            # Additional overlapping classes (7 classes)
+            {"name": "Algebra Workshop", "subject": "Mathematics", "day": "Monday", "time": "09:30-11:00", "teacher": "Dr. Wilson", "max_students": 10},
+            {"name": "Public Speaking", "subject": "Communication", "day": "Tuesday", "time": "10:00-11:30", "teacher": "Mr. Johnson", "max_students": 12},
+            {"name": "Digital Art", "subject": "Art", "day": "Wednesday", "time": "13:30-15:00", "teacher": "Ms. Taylor", "max_students": 10},
+            {"name": "Environmental Science", "subject": "Science", "day": "Thursday", "time": "09:30-11:00", "teacher": "Dr. Green", "max_students": 12},
+            {"name": "French Language", "subject": "French", "day": "Friday", "time": "10:00-11:30", "teacher": "Mme. Dubois", "max_students": 15},
+            {"name": "Game Development", "subject": "Computer Science", "day": "Monday", "time": "15:00-16:30", "teacher": "Mr. Parker", "max_students": 10},
+            {"name": "Yoga & Wellness", "subject": "PE", "day": "Wednesday", "time": "15:00-16:30", "teacher": "Ms. Kumar", "max_students": 20},
         ]
         
         classes = []
@@ -266,66 +275,131 @@ def seed_database():
         print("  → Creating class registrations...")
         
         # Manual registration entries ensuring no schedule conflicts
+        # Overlap constraints:
+        # Monday: 0-20 conflict, 2-25 conflict, 25-3 conflict
+        # Tuesday: 4-21 conflict, 21-5 conflict
+        # Wednesday: 22-10 conflict, 10-26 conflict, 26-11 conflict
+        # Thursday: 12-23 conflict
+        # Friday: 16-24 conflict, 24-17 conflict
+        
         registrations_data = [
-            # Emma Smith (Student 0) - 4 classes on different days/times
-            {"student_idx": 0, "class_idx": 0},  # Monday 09:00
-            {"student_idx": 0, "class_idx": 5},  # Tuesday 11:00
-            {"student_idx": 0, "class_idx": 9},  # Wednesday 11:00
-            {"student_idx": 0, "class_idx": 14}, # Thursday 14:00
+            # Emma Smith (Student 0) - 8 classes
+            {"student_idx": 0, "class_idx": 0},  # Monday 09:00 Math
+            {"student_idx": 0, "class_idx": 1},  # Monday 11:00 English
+            {"student_idx": 0, "class_idx": 3},  # Monday 16:00 Art
+            {"student_idx": 0, "class_idx": 5},  # Tuesday 11:00 History
+            {"student_idx": 0, "class_idx": 7},  # Tuesday 16:00 Music
+            {"student_idx": 0, "class_idx": 9},  # Wednesday 11:00 Creative Writing
+            {"student_idx": 0, "class_idx": 22}, # Wednesday 13:30 Digital Art
+            {"student_idx": 0, "class_idx": 18}, # Friday 14:00 Robotics
             
-            # Oliver Smith (Student 1) - 3 classes
-            {"student_idx": 1, "class_idx": 1},  # Monday 11:00
-            {"student_idx": 1, "class_idx": 6},  # Tuesday 14:00
-            {"student_idx": 1, "class_idx": 16}, # Friday 09:00
+            # Oliver Smith (Student 1) - 9 classes
+            {"student_idx": 1, "class_idx": 20}, # Monday 09:30 Algebra
+            {"student_idx": 1, "class_idx": 2},  # Monday 14:00 Science
+            {"student_idx": 1, "class_idx": 4},  # Tuesday 09:00 Advanced Math
+            {"student_idx": 1, "class_idx": 6},  # Tuesday 14:00 Programming
+            {"student_idx": 1, "class_idx": 7},  # Tuesday 16:00 Music
+            {"student_idx": 1, "class_idx": 8},  # Wednesday 09:00 Physics
+            {"student_idx": 1, "class_idx": 11}, # Wednesday 16:00 PE
+            {"student_idx": 1, "class_idx": 13}, # Thursday 11:00 Spanish
+            {"student_idx": 1, "class_idx": 16}, # Friday 09:00 Biology
             
-            # Sophia Johnson (Student 2) - 5 classes
-            {"student_idx": 2, "class_idx": 2},  # Monday 14:00
-            {"student_idx": 2, "class_idx": 4},  # Tuesday 09:00
-            {"student_idx": 2, "class_idx": 8},  # Wednesday 09:00
-            {"student_idx": 2, "class_idx": 12}, # Thursday 09:00
-            {"student_idx": 2, "class_idx": 17}, # Friday 11:00
+            # Sophia Johnson (Student 2) - 10 classes
+            {"student_idx": 2, "class_idx": 1},  # Monday 11:00 English
+            {"student_idx": 2, "class_idx": 25}, # Monday 15:00 Game Dev
+            {"student_idx": 2, "class_idx": 21}, # Tuesday 10:00 Public Speaking
+            {"student_idx": 2, "class_idx": 6},  # Tuesday 14:00 Programming
+            {"student_idx": 2, "class_idx": 8},  # Wednesday 09:00 Physics
+            {"student_idx": 2, "class_idx": 10}, # Wednesday 14:00 Geography
+            {"student_idx": 2, "class_idx": 12}, # Thursday 09:00 Chemistry
+            {"student_idx": 2, "class_idx": 14}, # Thursday 14:00 Web Dev
+            {"student_idx": 2, "class_idx": 15}, # Thursday 16:00 Drama
+            {"student_idx": 2, "class_idx": 17}, # Friday 11:00 Economics
             
-            # Liam Johnson (Student 3) - 3 classes
-            {"student_idx": 3, "class_idx": 3},  # Monday 16:00
-            {"student_idx": 3, "class_idx": 11}, # Wednesday 16:00
-            {"student_idx": 3, "class_idx": 19}, # Friday 16:00
+            # Liam Johnson (Student 3) - 8 classes
+            {"student_idx": 3, "class_idx": 0},  # Monday 09:00 Math
+            {"student_idx": 3, "class_idx": 1},  # Monday 11:00 English
+            {"student_idx": 3, "class_idx": 3},  # Monday 16:00 Art
+            {"student_idx": 3, "class_idx": 5},  # Tuesday 11:00 History
+            {"student_idx": 3, "class_idx": 9},  # Wednesday 11:00 Creative Writing
+            {"student_idx": 3, "class_idx": 11}, # Wednesday 16:00 PE
+            {"student_idx": 3, "class_idx": 13}, # Thursday 11:00 Spanish
+            {"student_idx": 3, "class_idx": 19}, # Friday 16:00 Photography
             
-            # Ava Williams (Student 4) - 5 classes
-            {"student_idx": 4, "class_idx": 0},  # Monday 09:00
-            {"student_idx": 4, "class_idx": 7},  # Tuesday 16:00
-            {"student_idx": 4, "class_idx": 10}, # Wednesday 14:00
-            {"student_idx": 4, "class_idx": 13}, # Thursday 11:00
-            {"student_idx": 4, "class_idx": 18}, # Friday 14:00
+            # Ava Williams (Student 4) - 11 classes
+            {"student_idx": 4, "class_idx": 20}, # Monday 09:30 Algebra
+            {"student_idx": 4, "class_idx": 2},  # Monday 14:00 Science
+            {"student_idx": 4, "class_idx": 4},  # Tuesday 09:00 Advanced Math
+            {"student_idx": 4, "class_idx": 6},  # Tuesday 14:00 Programming
+            {"student_idx": 4, "class_idx": 7},  # Tuesday 16:00 Music
+            {"student_idx": 4, "class_idx": 8},  # Wednesday 09:00 Physics
+            {"student_idx": 4, "class_idx": 26}, # Wednesday 15:00 Yoga
+            {"student_idx": 4, "class_idx": 23}, # Thursday 09:30 Environmental Science
+            {"student_idx": 4, "class_idx": 14}, # Thursday 14:00 Web Dev
+            {"student_idx": 4, "class_idx": 15}, # Thursday 16:00 Drama
+            {"student_idx": 4, "class_idx": 18}, # Friday 14:00 Robotics
             
-            # Noah Williams (Student 5) - 4 classes
-            {"student_idx": 5, "class_idx": 1},  # Monday 11:00
-            {"student_idx": 5, "class_idx": 6},  # Tuesday 14:00
-            {"student_idx": 5, "class_idx": 9},  # Wednesday 11:00
-            {"student_idx": 5, "class_idx": 15}, # Thursday 16:00
+            # Noah Williams (Student 5) - 9 classes
+            {"student_idx": 5, "class_idx": 1},  # Monday 11:00 English
+            {"student_idx": 5, "class_idx": 25}, # Monday 15:00 Game Dev
+            {"student_idx": 5, "class_idx": 5},  # Tuesday 11:00 History
+            {"student_idx": 5, "class_idx": 6},  # Tuesday 14:00 Programming
+            {"student_idx": 5, "class_idx": 9},  # Wednesday 11:00 Creative Writing
+            {"student_idx": 5, "class_idx": 22}, # Wednesday 13:30 Digital Art
+            {"student_idx": 5, "class_idx": 12}, # Thursday 09:00 Chemistry
+            {"student_idx": 5, "class_idx": 15}, # Thursday 16:00 Drama
+            {"student_idx": 5, "class_idx": 24}, # Friday 10:00 French
             
-            # Isabella Brown (Student 6) - 4 classes
-            {"student_idx": 6, "class_idx": 2},  # Monday 14:00
-            {"student_idx": 6, "class_idx": 5},  # Tuesday 11:00
-            {"student_idx": 6, "class_idx": 12}, # Thursday 09:00
-            {"student_idx": 6, "class_idx": 16}, # Friday 09:00
+            # Isabella Brown (Student 6) - 10 classes
+            {"student_idx": 6, "class_idx": 0},  # Monday 09:00 Math
+            {"student_idx": 6, "class_idx": 2},  # Monday 14:00 Science
+            {"student_idx": 6, "class_idx": 4},  # Tuesday 09:00 Advanced Math
+            {"student_idx": 6, "class_idx": 5},  # Tuesday 11:00 History
+            {"student_idx": 6, "class_idx": 7},  # Tuesday 16:00 Music
+            {"student_idx": 6, "class_idx": 9},  # Wednesday 11:00 Creative Writing
+            {"student_idx": 6, "class_idx": 10}, # Wednesday 14:00 Geography
+            {"student_idx": 6, "class_idx": 12}, # Thursday 09:00 Chemistry
+            {"student_idx": 6, "class_idx": 14}, # Thursday 14:00 Web Dev
+            {"student_idx": 6, "class_idx": 16}, # Friday 09:00 Biology
             
-            # Ethan Davis (Student 7) - 3 classes
-            {"student_idx": 7, "class_idx": 3},  # Monday 16:00
-            {"student_idx": 7, "class_idx": 11}, # Wednesday 16:00
-            {"student_idx": 7, "class_idx": 15}, # Thursday 16:00
+            # Ethan Davis (Student 7) - 11 classes
+            {"student_idx": 7, "class_idx": 1},  # Monday 11:00 English
+            {"student_idx": 7, "class_idx": 3},  # Monday 16:00 Art
+            {"student_idx": 7, "class_idx": 21}, # Tuesday 10:00 Public Speaking
+            {"student_idx": 7, "class_idx": 6},  # Tuesday 14:00 Programming
+            {"student_idx": 7, "class_idx": 8},  # Wednesday 09:00 Physics
+            {"student_idx": 7, "class_idx": 9},  # Wednesday 11:00 Creative Writing
+            {"student_idx": 7, "class_idx": 11}, # Wednesday 16:00 PE
+            {"student_idx": 7, "class_idx": 13}, # Thursday 11:00 Spanish
+            {"student_idx": 7, "class_idx": 15}, # Thursday 16:00 Drama
+            {"student_idx": 7, "class_idx": 17}, # Friday 11:00 Economics
+            {"student_idx": 7, "class_idx": 19}, # Friday 16:00 Photography
             
-            # Mia Wilson (Student 8) - 5 classes
-            {"student_idx": 8, "class_idx": 4},  # Tuesday 09:00
-            {"student_idx": 8, "class_idx": 8},  # Wednesday 09:00
-            {"student_idx": 8, "class_idx": 10}, # Wednesday 14:00
-            {"student_idx": 8, "class_idx": 14}, # Thursday 14:00
-            {"student_idx": 8, "class_idx": 19}, # Friday 16:00
+            # Mia Wilson (Student 8) - 10 classes
+            {"student_idx": 8, "class_idx": 20}, # Monday 09:30 Algebra
+            {"student_idx": 8, "class_idx": 25}, # Monday 15:00 Game Dev
+            {"student_idx": 8, "class_idx": 4},  # Tuesday 09:00 Advanced Math
+            {"student_idx": 8, "class_idx": 7},  # Tuesday 16:00 Music
+            {"student_idx": 8, "class_idx": 8},  # Wednesday 09:00 Physics
+            {"student_idx": 8, "class_idx": 26}, # Wednesday 15:00 Yoga
+            {"student_idx": 8, "class_idx": 23}, # Thursday 09:30 Environmental Science
+            {"student_idx": 8, "class_idx": 14}, # Thursday 14:00 Web Dev
+            {"student_idx": 8, "class_idx": 24}, # Friday 10:00 French
+            {"student_idx": 8, "class_idx": 19}, # Friday 16:00 Photography
             
-            # Lucas Martinez (Student 9) - 4 classes
-            {"student_idx": 9, "class_idx": 0},  # Monday 09:00
-            {"student_idx": 9, "class_idx": 7},  # Tuesday 16:00
-            {"student_idx": 9, "class_idx": 13}, # Thursday 11:00
-            {"student_idx": 9, "class_idx": 17}, # Friday 11:00
+            # Lucas Martinez (Student 9) - 12 classes
+            {"student_idx": 9, "class_idx": 0},  # Monday 09:00 Math
+            {"student_idx": 9, "class_idx": 1},  # Monday 11:00 English
+            {"student_idx": 9, "class_idx": 2},  # Monday 14:00 Science
+            {"student_idx": 9, "class_idx": 5},  # Tuesday 11:00 History
+            {"student_idx": 9, "class_idx": 7},  # Tuesday 16:00 Music
+            {"student_idx": 9, "class_idx": 9},  # Wednesday 11:00 Creative Writing
+            {"student_idx": 9, "class_idx": 22}, # Wednesday 13:30 Digital Art
+            {"student_idx": 9, "class_idx": 12}, # Thursday 09:00 Chemistry
+            {"student_idx": 9, "class_idx": 13}, # Thursday 11:00 Spanish
+            {"student_idx": 9, "class_idx": 15}, # Thursday 16:00 Drama
+            {"student_idx": 9, "class_idx": 17}, # Friday 11:00 Economics
+            {"student_idx": 9, "class_idx": 18}, # Friday 14:00 Robotics
         ]
         
         for reg_data in registrations_data:
@@ -342,9 +416,9 @@ def seed_database():
         print(f"  • 1 Staff user")
         print(f"  • 7 Parents")
         print(f"  • 10 Students (3 parents with 2 children, 4 with 1 child)")
-        print(f"  • 20 Classes (4 per weekday)")
+        print(f"  • 27 Classes (20 standard + 7 with overlapping time slots)")
         print(f"  • {len(subscriptions_data)} Subscriptions")
-        print(f"  • {len(registrations_data)} Class Registrations")
+        print(f"  • {len(registrations_data)} Class Registrations (no overlapping classes per student)")
         print("\n🔑 Test Credentials:")
         print("  Staff: staff@minilms.com / password123")
         print("  Parent: john.smith@email.com / password123")
