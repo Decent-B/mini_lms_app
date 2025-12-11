@@ -43,6 +43,20 @@ def get_classes(
     return classes
 
 
+@router.get("/{class_id}/registrations", response_model=list[RegistrationResponse])
+def get_class_registrations(
+    class_id: int,
+    db: Annotated[Session, Depends(get_db)]
+):
+    """
+    Get all registrations for a specific class.
+    
+    Returns a list of registrations with student information.
+    """
+    registrations = class_service.get_class_registrations(db, class_id)
+    return registrations
+
+
 @router.post("/{class_id}/register", response_model=RegistrationResponse, status_code=status.HTTP_201_CREATED)
 def register_student(
     class_id: int,

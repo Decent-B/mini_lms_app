@@ -577,7 +577,108 @@ Array of class objects, each containing:
 
 ## Class Registration APIs
 
-### 7. Register Student to Class
+### 7. Get Class Registrations
+
+**Endpoint:** `GET /api/classes/{class_id}/registrations`
+
+**Description:** Retrieves all enrolled students for a specific class with their detailed information.
+
+**Authentication:** Required (Bearer token)
+
+**Path Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `class_id` | integer | Yes | ID of the class |
+
+**Request Example:**
+```bash
+curl http://localhost:8000/api/classes/1/registrations \
+  -H "Authorization: Bearer <your_token>"
+```
+
+**Response (200 OK):**
+```json
+[
+  {
+    "student_id": 1,
+    "class_id": 1,
+    "id": 1,
+    "student": {
+      "dob": "2010-03-15",
+      "gender": "Female",
+      "current_grade": "Grade 8",
+      "parent_id": 1,
+      "id": 1,
+      "user_id": 9,
+      "user": {
+        "name": "Emma Smith",
+        "email": "emma.smith@email.com",
+        "id": 9,
+        "role": "student"
+      }
+    }
+  },
+  {
+    "student_id": 5,
+    "class_id": 1,
+    "id": 16,
+    "student": {
+      "dob": "2010-11-28",
+      "gender": "Female",
+      "current_grade": "Grade 8",
+      "parent_id": 3,
+      "id": 5,
+      "user_id": 13,
+      "user": {
+        "name": "Ava Williams",
+        "email": "ava.williams@email.com",
+        "id": 13,
+        "role": "student"
+      }
+    }
+  }
+]
+```
+
+**Response Parameters:**
+
+Array of registration objects, each containing:
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | Registration record ID |
+| `student_id` | integer | Student ID |
+| `class_id` | integer | Class ID |
+| `student` | object | Full student details |
+| `student.id` | integer | Student record ID |
+| `student.user_id` | integer | Associated user ID |
+| `student.dob` | string \| null | Date of birth (ISO format) |
+| `student.gender` | string \| null | Student gender |
+| `student.current_grade` | string \| null | Current grade level |
+| `student.parent_id` | integer \| null | Parent ID |
+| `student.user` | object | User information |
+| `student.user.id` | integer | User ID |
+| `student.user.name` | string | Student name |
+| `student.user.email` | string | Student email |
+| `student.user.role` | string | User role (always "student") |
+
+**Error Responses:**
+
+| Status Code | Condition | Response Example |
+|-------------|-----------|------------------|
+| 404 | Class not found | `{"detail": "Class not found"}` |
+| 422 | Invalid class_id | `{"detail": [{"type": "int_parsing", "loc": ["path", "class_id"], "msg": "Input should be a valid integer"}]}` |
+
+**Use Cases:**
+- Display enrolled students in class management interface
+- Show class roster to teachers
+- Calculate current enrollment vs. capacity
+- Verify student registrations
+
+---
+
+### 8. Register Student to Class
 
 **Endpoint:** `POST /api/classes/{class_id}/register`
 

@@ -6,6 +6,8 @@ Defines request/response structures for class registration operations.
 
 from pydantic import BaseModel, Field
 
+from app.schemas.student import StudentResponse
+
 
 # Base schema with common fields
 class RegistrationBase(BaseModel):
@@ -22,8 +24,9 @@ class RegistrationCreate(BaseModel):
 
 # Schema for registration response
 class RegistrationResponse(RegistrationBase):
-    """Schema for registration in API responses."""
+    """Schema for registration in API responses with student details."""
     id: int
+    student: StudentResponse
 
     model_config = {"from_attributes": True}
 

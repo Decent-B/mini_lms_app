@@ -103,6 +103,36 @@ def get_classes_by_day(db: Session, day: str | None = None) -> list[ClassModel]:
     return query.all()
 
 
+def get_class_registrations(db: Session, class_id: int) -> list[ClassRegistration]:
+    """
+    Get all registrations for a specific class.
+    
+    Args:
+        db: Database session
+        class_id: Class ID
+        
+    Returns:
+        List of class registrations with student information
+        
+    Raises:
+        HTTPException: If class not found
+    """
+    # Check if class exists
+    class_obj = db.query(ClassModel).filter(ClassModel.id == class_id).first()
+    if not class_obj:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Class not found"
+        )
+    
+    # Get all registrations for this class
+    registrations = db.query(ClassRegistration).filter(
+        ClassRegistration.class_id == class_id
+    ).all()
+    
+    return registrations
+
+
 def register_student_to_class(db: Session, class_id: int, student_id: int) -> ClassRegistration:
     """
     Register a student to a class with schedule conflict checking.
