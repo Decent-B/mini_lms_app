@@ -132,8 +132,6 @@ mini_lms_app/
 
 ---
 
-## ✨ Key Features
-
 ### 🔐 Authentication & Authorization
 - JWT-based authentication with role-based access control
 - Secure password hashing using bcrypt
@@ -359,16 +357,20 @@ You can also test APIs manually using curl or the interactive documentation:
 # Login
 curl -X POST http://localhost:8000/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email": "staff@example.com", "password": "staff123"}'
+  -d '{"email": "staff@minilms.com", "password": "password123"}'
 
 # Get classes for Monday
-curl -X GET "http://localhost:8000/api/classes?day_of_week=Monday" \
+curl -X GET "http://localhost:8000/api/classes?day=Monday" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 ---
 
 ## 🖥 Using the UI
+
+### Login Screen
+
+![Login Screen](system_docs/UI_demo_images/Login_Screen.png)
 
 ### Test Accounts
 
@@ -387,6 +389,18 @@ The system is seeded with test accounts for each role:
 3. Manage parents, students, classes, and subscriptions
 4. View weekly class schedules with visual conflict detection
 5. Edit any resource using the pen icon buttons
+
+**Parent Management:**
+
+![Parent Management](system_docs/UI_demo_images/Parent_Management_Tab_Admin_Panel.png)
+
+**Subscription Management:**
+
+![Subscription Management](system_docs/UI_demo_images/Subscription_Management_Tab_Admin_Panel.png)
+
+**Class Timetable:**
+
+![Class Timetable](system_docs/UI_demo_images/Class_Timetable.png)
 
 ### Parent Dashboard
 
@@ -414,65 +428,6 @@ The system is seeded with test accounts for each role:
 
 ---
 
-## 📚 API Documentation
-
-### Complete API Reference
-
-For detailed information about all available API endpoints, including request/response schemas, authentication requirements, and examples, refer to:
-
-**📄 [Complete API Documentation](system_docs/api_documentation.md)**
-
-The documentation covers:
-- Authentication endpoints
-- Parent management (CRUD)
-- Student management (CRUD)
-- Class management (CRUD)
-- Class registration with conflict detection
-- Subscription management (CRUD + usage tracking)
-- All request/response examples with curl commands
-
-### Quick API Overview
-
-#### Authentication
-- `POST /api/auth/login` - User login
-
-#### Parents
-- `GET /api/parents` - List all parents
-- `POST /api/parents` - Create parent
-- `GET /api/parents/{id}` - Get parent details
-- `PATCH /api/parents/{id}` - Update parent
-- `DELETE /api/parents/{id}` - Delete parent
-- `GET /api/parents/me` - Get current parent's info
-
-#### Students
-- `GET /api/students` - List all students
-- `POST /api/students` - Create student
-- `GET /api/students/{id}` - Get student details
-- `PATCH /api/students/{id}` - Update student
-- `DELETE /api/students/{id}` - Delete student
-- `GET /api/students/me` - Get current student's info
-- `GET /api/students/me/classes` - Get student's classes
-
-#### Classes
-- `GET /api/classes` - List all classes (filterable by day)
-- `POST /api/classes` - Create class
-- `GET /api/classes/{id}` - Get class details with enrolled students
-- `PATCH /api/classes/{id}` - Update class
-- `DELETE /api/classes/{id}` - Delete class
-- `POST /api/classes/{id}/register` - Register student to class
-- `DELETE /api/classes/{id}/registrations/{student_id}` - Unregister student
-
-#### Subscriptions
-- `GET /api/subscriptions` - List all subscriptions
-- `POST /api/subscriptions` - Create subscription
-- `GET /api/subscriptions/{id}` - Get subscription details
-- `PATCH /api/subscriptions/{id}` - Update subscription
-- `DELETE /api/subscriptions/{id}` - Delete subscription
-- `PATCH /api/subscriptions/{id}/use` - Use one session
-- `GET /api/students/me/subscriptions` - Get student's subscriptions
-
----
-
 ## 📊 Test Data
 
 The database is automatically seeded with realistic test data on first startup:
@@ -495,330 +450,6 @@ All test accounts use the same password: `password123`
 - **25 Subscriptions** (students have 2-3 subscriptions each)
 - **101 Class Registrations** (no schedule conflicts per student)
 
-## 🏗️ Architecture
-
-### Tech Stack
-
-**Backend:**
-- FastAPI (Python 3.12)
-- PostgreSQL 16
-- SQLAlchemy ORM
-- Alembic (migrations)
-- JWT Authentication
-- Bcrypt password hashing
-
-**Frontend:**
-- React 18 with TypeScript
-- Vite build tool
-- (To be implemented)
-
-**DevOps:**
-- Docker & Docker Compose
-- Multi-stage builds
-- Automated migrations
-- Database seeding
-
-### Project Structure
-
-```
-mini_lms_app/
-├── backend/
-│   ├── app/
-│   │   ├── core/          # Configuration, security, database
-│   │   ├── models/        # SQLAlchemy models (6 tables)
-│   │   ├── schemas/       # Pydantic validation schemas
-│   │   ├── routers/       # API endpoints (to be implemented)
-│   │   ├── services/      # Business logic
-│   │   ├── main.py        # FastAPI application
-│   │   └── seed_data.py   # Database seeding script
-│   ├── alembic/           # Database migrations
-│   ├── Dockerfile
-│   └── docker-entrypoint.sh
-├── frontend/              # React TypeScript app (to be implemented)
-├── docker-compose.yml     # Orchestration
-├── .env.example           # Environment template
-└── README.md
-```
-
-## 🗄️ Database Schema
-
-### Users
-- Authentication for all system users
-- Roles: `staff`, `parent`, `student`
-
-### Parents → Students (One-to-Many)
-- Parents can have multiple children
-- Students linked to one parent
-
-### Students ↔ Classes (Many-to-Many via ClassRegistrations)
-- Students can enroll in multiple classes
-- Unique constraint prevents duplicate enrollments
-- No schedule conflicts enforced
-
-### Students → Subscriptions (One-to-Many)
-- Track learning package sessions
-- Monitor used vs remaining sessions
-
-## 🔧 Development
-
-### Backend Development
-
-```bash
-cd backend
-
-# Install dependencies
-uv sync
-
-# Activate virtual environment
-source .venv/bin/activate
-
-# Run locally (database must be running)
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
-
-### Database Management
-
-```bash
-# Create new migration
-docker-compose exec backend alembic revision --autogenerate -m "Description"
-
-# Apply migrations
-docker-compose exec backend alembic upgrade head
-
-# Rollback one migration
-docker-compose exec backend alembic downgrade -1
-
-# Re-seed database (WARNING: clears existing data)
-docker-compose exec backend python -m app.seed_data
-```
-
-### View Logs
-
-```bash
-# All services
-docker-compose logs -f
-
-# Backend only
-docker-compose logs -f backend
-
-# Database only
-docker-compose logs -f db
-```
-
-## 🧪 Testing
-
-```bash
-cd backend
-pytest tests/ -v
-```
-
-## 🔄 Database Management
-
-### Development Mode (Auto-Reset)
-
-When `ENVIRONMENT=development` in your `.env` file:
-- **Automatic**: Database tables are **dropped and recreated** on every backend restart
-- **Automatic**: Fresh test data is seeded every time
-- **Use case**: Local development, testing changes from scratch
-
-```bash
-# Start in development mode (default)
-docker-compose up -d
-
-# Restart to reset database
-docker-compose restart backend
-
-# Or force rebuild
-docker-compose down && docker-compose up --build -d
-```
-
-**What happens in development:**
-1. Backend starts
-2. All tables are **dropped** (⚠️ all data lost)
-3. Tables are recreated with latest schema
-4. Database is seeded with test data
-5. Application starts
-
-### Production Mode (Preserve Data)
-
-When `ENVIRONMENT=production` in your `.env` file:
-- **Safe**: Database is **never dropped automatically**
-- **Idempotent**: Seeding only runs if database is empty
-- **Use case**: Production, staging environments
-
-```bash
-# Set environment in .env
-ENVIRONMENT=production
-
-# Start application
-docker-compose up -d
-```
-
-**What happens in production:**
-1. Backend starts
-2. Tables are created **only if they don't exist**
-3. Seeding **skipped** if any users exist
-4. Application starts with existing data intact
-
-### Manual Database Operations
-
-```bash
-# Drop all data and reseed (development only)
-docker-compose restart backend
-
-# Run migrations manually
-docker-compose exec backend alembic upgrade head
-
-# Seed database manually
-docker-compose exec backend python -m app.seed_data
-
-# Access database directly
-docker-compose exec db psql -U lms_user -d mini_lms_db
-
-# Backup database
-docker-compose exec db pg_dump -U lms_user mini_lms_db > backup.sql
-
-# Restore database
-docker-compose exec -T db psql -U lms_user mini_lms_db < backup.sql
-```
-
-### Environment Configuration
-
-Edit your `.env` file:
-
-```bash
-# For local development (auto-reset)
-ENVIRONMENT=development
-
-# For production/staging (preserve data)
-ENVIRONMENT=production
-```
-
-⚠️ **Warning**: Never set `ENVIRONMENT=development` in production! All data will be lost on restart.
-
-## 📝 API Documentation
-
-Once running, visit http://localhost:8000/docs for interactive API documentation.
-
-### Planned Endpoints
-
-**Authentication:**
-- POST `/api/v1/auth/login` - User login
-
-**Staff Only:**
-- CRUD operations for parents, students, classes
-- Manage subscriptions and registrations
-
-**Parent Access:**
-- View children's subscriptions and schedules
-
-**Student Access:**
-- View own subscriptions and class schedule
-
-## 🚢 Deployment
-
-### Production Build
-
-```bash
-# Build production images
-docker-compose -f docker-compose.prod.yml build
-
-# Start in production mode
-docker-compose -f docker-compose.prod.yml up -d
-```
-
-### Environment Variables
-
-Required in production:
-
-```bash
-DATABASE_URL=postgresql://user:password@host:5432/dbname
-SECRET_KEY=<64-character-hex-string>
-POSTGRES_PASSWORD=<strong-password>
----
-
-## 🛠 Development
-
-### Local Development Setup
-
-If you want to develop without Docker:
-
-**Backend:**
-
-```bash
-cd backend
-
-# Create virtual environment
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run migrations
-alembic upgrade head
-
-# Start development server
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
-
-**Frontend:**
-
-```bash
-cd frontend
-
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
-```
-
-### Database Migrations
-
-Create a new migration after model changes:
-
-```bash
-cd backend
-alembic revision --autogenerate -m "Description of changes"
-alembic upgrade head
-```
-
----
-
-## 🔒 Security Considerations
-
-### Implemented Security Features
-
-✅ **Authentication & Authorization:**
-- JWT token-based authentication
-- Bcrypt password hashing with salt
-- Role-based access control (RBAC)
-- Protected API endpoints
-
-✅ **Data Security:**
-- SQL injection protection via ORM (SQLAlchemy)
-- Input validation and sanitization (Pydantic)
-- Environment-based secrets management
-- Non-root Docker containers
-
-✅ **API Security:**
-- CORS configuration
-- Request/response validation
-- Automatic API documentation
-
-### Important Security Notes
-
-⚠️ **Production Deployment:**
-- Always generate new `SECRET_KEY` for production
-- Use strong `POSTGRES_PASSWORD`
-- Never commit `.env` file to version control
-- Enable HTTPS in production
-- Configure proper CORS origins
-- Set `ENVIRONMENT=production` in production `.env`
-
----
-
 ## 📚 Additional Documentation
 
 For more detailed information, refer to:
@@ -828,42 +459,6 @@ For more detailed information, refer to:
 - 🎯 **[Use Cases](system_docs/use_cases.md)** - Detailed use case specifications
 - 🛠 **[Tech Stack](system_docs/tech_stack.md)** - Complete technology stack details
 - 📊 **[Test Data Reference](system_docs/TEST_DATA_REFERENCE.md)** - Seeded test data
-
----
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**Port already in use:**
-```bash
-# Check what's using the port
-lsof -i :3000  # or :8000
-# Kill the process or change the port in docker-compose.yml
-```
-
-**Database connection errors:**
-```bash
-# Ensure PostgreSQL is running
-docker-compose ps db
-# Check database logs
-docker-compose logs db
-# Restart database
-docker-compose restart db
-```
-
-**Frontend not loading:**
-```bash
-# Rebuild frontend
-docker-compose up --build -d frontend
-# Check frontend logs
-docker-compose logs frontend
-```
-
-**Authentication errors:**
-- Verify `SECRET_KEY` is set in `.env`
-- Check that you're using the correct test account credentials
-- Ensure token is included in Authorization header
 
 ---
 
