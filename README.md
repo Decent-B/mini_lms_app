@@ -11,7 +11,11 @@
 - [Running the Application](#running-the-application)
 - [Testing the APIs](#testing-the-apis)
 - [Using the UI](#using-the-ui)
-- [API Documentation](#api-documentation)
+- [Test Data](#test-data)
+- [Additional Documentation](#additional-documentation)
+- [Authors](#authors)
+- [Acknowledgments](#acknowledgments)
+- [Support](#support)
 
 ---
 
@@ -131,6 +135,8 @@ mini_lms_app/
 ```
 
 ---
+
+## ✨ Key Features
 
 ### 🔐 Authentication & Authorization
 - JWT-based authentication with role-based access control
