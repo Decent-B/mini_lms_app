@@ -10,7 +10,7 @@ from fastapi import HTTPException, status
 
 from app.models.parent import Parent
 from app.models.user import User, UserRole
-from app.schemas.parent import ParentCreate
+from app.schemas.parent import ParentCreate, ParentUpdate
 from app.core.security import get_password_hash
 
 
@@ -129,3 +129,67 @@ def delete_parent(db: Session, parent_id: int) -> None:
     # Delete user (will cascade to parent due to foreign key)
     db.query(User).filter(User.id == parent.user_id).delete()
     db.commit()
+
+
+def get_parent_by_user_id(db: Session, user_id: int) -> Parent:
+    """
+    Get parent by their user ID.
+    
+    Args:
+        db: Database session
+        user_id: User ID
+        
+    Returns:
+        Parent object with relationships loaded
+        
+    Raises:
+        HTTPException: If parent not found
+    """
+    parent = db.query(Parent).filter(Parent.user_id == user_id).first()
+    
+    if not parent:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Parent not found"
+        )
+    
+    return parent
+
+
+def update_parent(db: Session, parent_id: int, parent_data: "ParentUpdate") -> Parent:
+    """
+    Update parent information.
+    
+    Args:
+        db: Database session
+        parent_id: Parent ID to update
+        parent_data: ParentUpdate schema with updated fields
+        
+    Returns:
+        Updated parent object
+        
+    Raises:
+        HTTPException: If parent not found
+    """
+    parent = db.query(Parent).filter(Parent.id == parent_id).first()
+    
+    if not parent:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Parent not found"
+        )
+    
+    # Update parent fields
+    if parent_data.phone is not None:
+        parent.phone = parent_data.phone
+    
+    # Update user name if provided
+    if parent_data.name is not None:
+        user = db.query(User).filter(User.id == parent.user_id).first()
+        if user:
+            user.name = parent_data.name
+    
+    db.commit()
+    db.refresh(parent)
+    
+    return parent

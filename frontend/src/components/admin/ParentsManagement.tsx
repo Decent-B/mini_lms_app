@@ -25,6 +25,14 @@ const ParentsManagement = () => {
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Edit parent modal state
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingParent, setEditingParent] = useState<Parent | null>(null);
+  const [editFormData, setEditFormData] = useState({
+    name: '',
+    phone: '',
+  });
+
   useEffect(() => {
     fetchParents();
   }, []);
@@ -114,6 +122,41 @@ const ParentsManagement = () => {
     setFormError(null);
   };
 
+  const handleEditClick = (parent: Parent) => {
+    setEditingParent(parent);
+    setEditFormData({
+      name: parent.user.name,
+      phone: parent.phone || '',
+    });
+    setShowEditModal(true);
+  };
+
+  const handleEditParent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingParent) return;
+
+    setFormError(null);
+    setIsSubmitting(true);
+
+    try {
+      const response = await api.patch<Parent>(`/parents/${editingParent.id}`, editFormData);
+      setParents(parents.map(p => p.id === editingParent.id ? response.data : p));
+      setShowEditModal(false);
+      setEditingParent(null);
+      setFormError(null);
+    } catch (err: any) {
+      setFormError(err.response?.data?.detail || 'Failed to update parent');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCloseEditModal = () => {
+    setShowEditModal(false);
+    setEditingParent(null);
+    setFormError(null);
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -186,15 +229,26 @@ const ParentsManagement = () => {
                   </div>
                 </div>
 
-                <button
-                  onClick={() => handleDeleteParent(parent.id, parent.user.name)}
-                  className="ml-4 p-2 text-red-500 hover:bg-red-50 rounded-lg transition"
-                  title="Delete parent"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleEditClick(parent)}
+                    className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition"
+                    title="Edit parent"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => handleDeleteParent(parent.id, parent.user.name)}
+                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition"
+                    title="Delete parent"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
               </div>
 
               {/* Expandable Children */}
@@ -321,6 +375,74 @@ const ParentsManagement = () => {
                   className="flex-1 px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg shadow hover:from-green-600 hover:to-green-700 transition disabled:opacity-50"
                 >
                   {isSubmitting ? 'Creating...' : 'Create Parent'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Parent Modal */}
+      {showEditModal && editingParent && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full mx-4">
+            <h3 className="text-2xl font-bold text-slate-800 mb-6">Edit Parent</h3>
+            
+            {formError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                {formError}
+              </div>
+            )}
+
+            <form onSubmit={handleEditParent}>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    value={editFormData.name}
+                    onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="John Doe"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Phone
+                  </label>
+                  <input
+                    type="tel"
+                    value={editFormData.phone}
+                    onChange={(e) => setEditFormData({ ...editFormData, phone: e.target.value })}
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="555-0123"
+                  />
+                </div>
+
+                <div className="text-sm text-slate-500">
+                  <p>Email: {editingParent.user.email}</p>
+                  <p className="text-xs mt-1">Email cannot be changed</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  type="button"
+                  onClick={handleCloseEditModal}
+                  disabled={isSubmitting}
+                  className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg shadow hover:from-blue-600 hover:to-blue-700 transition disabled:opacity-50"
+                >
+                  {isSubmitting ? 'Updating...' : 'Update Parent'}
                 </button>
               </div>
             </form>

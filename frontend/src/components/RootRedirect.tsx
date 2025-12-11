@@ -15,8 +15,15 @@ export default function RootRedirect() {
     );
   }
 
-  if (isAuthenticated && user?.role === 'staff') {
-    return <Navigate to="/admin" replace />;
+  if (isAuthenticated && user) {
+    // Redirect based on user role
+    if (user.role === 'staff') {
+      return <Navigate to="/admin" replace />;
+    } else if (user.role === 'student') {
+      return <Navigate to="/student/dashboard" replace />;
+    } else if (user.role === 'parent') {
+      return <Navigate to="/parent/dashboard" replace />;
+    }
   }
 
   return <Navigate to="/login" replace />;

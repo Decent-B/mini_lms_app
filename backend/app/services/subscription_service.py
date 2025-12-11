@@ -11,7 +11,7 @@ from fastapi import HTTPException, status
 
 from app.models.subscription import Subscription
 from app.models.student import Student
-from app.schemas.subscription import SubscriptionCreate
+from app.schemas.subscription import SubscriptionCreate, SubscriptionUpdate
 
 
 def create_subscription(db: Session, subscription_data: SubscriptionCreate) -> Subscription:
@@ -198,3 +198,67 @@ def delete_subscription(db: Session, subscription_id: int) -> None:
     
     db.delete(subscription)
     db.commit()
+
+
+def get_subscriptions_by_student_id(db: Session, student_id: int) -> list[Subscription]:
+    """
+    Get all subscriptions for a specific student.
+    
+    Args:
+        db: Database session
+        student_id: Student ID
+        
+    Returns:
+        List of subscriptions for the student
+    """
+    subscriptions = db.query(Subscription).filter(Subscription.student_id == student_id).all()
+    return subscriptions
+
+
+def update_subscription(db: Session, subscription_id: int, subscription_data: "SubscriptionUpdate") -> Subscription:
+    """
+    Update subscription information.
+    
+    Args:
+        db: Database session
+        subscription_id: Subscription ID to update
+        subscription_data: SubscriptionUpdate schema with updated fields
+        
+    Returns:
+        Updated subscription object
+        
+    Raises:
+        HTTPException: If subscription not found or validation fails
+    """
+    subscription = db.query(Subscription).filter(Subscription.id == subscription_id).first()
+    
+    if not subscription:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Subscription not found"
+        )
+    
+    # Update fields
+    if subscription_data.package_name is not None:
+        subscription.package_name = subscription_data.package_name
+    if subscription_data.start_date is not None:
+        subscription.start_date = subscription_data.start_date.isoformat()  # type: ignore
+    if subscription_data.end_date is not None:
+        subscription.end_date = subscription_data.end_date.isoformat()  # type: ignore
+    if subscription_data.total_sessions is not None:
+        subscription.total_sessions = subscription_data.total_sessions
+    if subscription_data.used_sessions is not None:
+        subscription.used_sessions = subscription_data.used_sessions
+    
+    # Validate date range if both dates are set
+    if subscription.end_date and subscription.start_date:
+        if subscription.end_date < subscription.start_date:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="end_date must be after start_date"
+            )
+    
+    db.commit()
+    db.refresh(subscription)
+    
+    return subscription

@@ -2,12 +2,10 @@
 Subscription management API endpoints.
 """
 
-from typing import Annotated
-from fastapi import APIRouter, Depends, status
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, status
 
-from app.core.database import get_db
-from app.schemas.subscription import SubscriptionCreate, SubscriptionResponse
+from app.core.dependencies import DatabaseSession, StaffUser
+from app.schemas.subscription import SubscriptionCreate, SubscriptionResponse, SubscriptionUpdate
 from app.services import subscription_service
 
 router = APIRouter(prefix="/api/subscriptions", tags=["subscriptions"])
@@ -15,11 +13,13 @@ router = APIRouter(prefix="/api/subscriptions", tags=["subscriptions"])
 
 @router.get("", response_model=list[SubscriptionResponse])
 def get_all_subscriptions(
-    db: Annotated[Session, Depends(get_db)]
+    staff_user: StaffUser,
+    db: DatabaseSession
 ):
     """
     Get all subscriptions.
     
+    Requires: Staff role
     Returns a list of all subscriptions with student information.
     """
     subscriptions = subscription_service.get_all_subscriptions(db)
@@ -29,11 +29,13 @@ def get_all_subscriptions(
 @router.post("", response_model=SubscriptionResponse, status_code=status.HTTP_201_CREATED)
 def create_subscription(
     subscription_data: SubscriptionCreate,
-    db: Annotated[Session, Depends(get_db)]
+    staff_user: StaffUser,
+    db: DatabaseSession
 ):
     """
     Create a new subscription for a student.
     
+    Requires: Staff role
     Validates:
     - Student exists
     - end_date is after start_date
@@ -46,11 +48,13 @@ def create_subscription(
 @router.patch("/{subscription_id}/use", response_model=SubscriptionResponse)
 def use_session(
     subscription_id: int,
-    db: Annotated[Session, Depends(get_db)]
+    staff_user: StaffUser,
+    db: DatabaseSession
 ):
     """
     Mark one session as used.
     
+    Requires: Staff role
     Increments used_sessions and deactivates subscription if all sessions are used.
     
     Validates:
@@ -65,11 +69,13 @@ def use_session(
 @router.get("/{subscription_id}", response_model=SubscriptionResponse)
 def get_subscription(
     subscription_id: int,
-    db: Annotated[Session, Depends(get_db)]
+    staff_user: StaffUser,
+    db: DatabaseSession
 ):
     """
     Get subscription details.
     
+    Requires: Staff role
     Returns subscription information including total sessions, used sessions,
     and remaining sessions.
     """
@@ -80,12 +86,31 @@ def get_subscription(
 @router.delete("/{subscription_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_subscription(
     subscription_id: int,
-    db: Annotated[Session, Depends(get_db)]
+    staff_user: StaffUser,
+    db: DatabaseSession
 ):
     """
     Delete a subscription.
     
+    Requires: Staff role
     Removes the subscription from the database.
     """
     subscription_service.delete_subscription(db, subscription_id)
     return None
+
+
+@router.patch("/{subscription_id}", response_model=SubscriptionResponse)
+def update_subscription(
+    subscription_id: int,
+    subscription_data: SubscriptionUpdate,
+    staff_user: StaffUser,
+    db: DatabaseSession
+):
+    """
+    Update subscription information.
+    
+    Requires: Staff role
+    Updates subscription package name, dates, total sessions, and/or used sessions.
+    """
+    subscription = subscription_service.update_subscription(db, subscription_id, subscription_data)
+    return subscription

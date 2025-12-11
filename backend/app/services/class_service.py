@@ -13,7 +13,45 @@ from app.models.class_model import ClassModel
 from app.models.student import Student
 from app.models.class_registration import ClassRegistration
 from app.models.subscription import Subscription
-from app.schemas.class_schema import ClassCreate
+from app.schemas.class_schema import ClassCreate, ClassUpdate
+
+
+def _validate_time_slot_format(time_slot: str) -> None:
+    """
+    Validate time slot format (HH:MM-HH:MM).
+    
+    Args:
+        time_slot: Time slot string to validate
+        
+    Raises:
+        HTTPException: If format is invalid
+    """
+    try:
+        if "-" not in time_slot:
+            raise ValueError("Time slot must contain a range with '-' separator")
+        
+        # Format: "09:00-10:30"
+        start_time, end_time = time_slot.split("-")
+        for time_part in [start_time.strip(), end_time.strip()]:
+            hours, minutes = map(int, time_part.split(":"))
+            if not (0 <= hours < 24 and 0 <= minutes < 60):
+                raise ValueError("Invalid time values")
+        
+        # Validate that end time is after start time
+        start_hours, start_minutes = map(int, start_time.strip().split(":"))
+        end_hours, end_minutes = map(int, end_time.strip().split(":"))
+        start_total_minutes = start_hours * 60 + start_minutes
+        end_total_minutes = end_hours * 60 + end_minutes
+        
+        if end_total_minutes <= start_total_minutes:
+            raise ValueError("End time must be after start time")
+            
+    except (ValueError, AttributeError) as e:
+        error_msg = str(e) if "must" in str(e) else "Invalid time_slot format"
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"{error_msg}. Use 'HH:MM-HH:MM' format (e.g., '09:00-10:30')"
+        )
 
 
 def create_class(db: Session, class_data: ClassCreate) -> ClassModel:
@@ -32,32 +70,7 @@ def create_class(db: Session, class_data: ClassCreate) -> ClassModel:
     """
     # Validate time slot format (HH:MM-HH:MM only)
     if class_data.time_slot:
-        try:
-            if "-" not in class_data.time_slot:
-                raise ValueError("Time slot must contain a range with '-' separator")
-            
-            # Format: "09:00-10:30"
-            start_time, end_time = class_data.time_slot.split("-")
-            for time_part in [start_time.strip(), end_time.strip()]:
-                hours, minutes = map(int, time_part.split(":"))
-                if not (0 <= hours < 24 and 0 <= minutes < 60):
-                    raise ValueError("Invalid time values")
-            
-            # Validate that end time is after start time
-            start_hours, start_minutes = map(int, start_time.strip().split(":"))
-            end_hours, end_minutes = map(int, end_time.strip().split(":"))
-            start_total_minutes = start_hours * 60 + start_minutes
-            end_total_minutes = end_hours * 60 + end_minutes
-            
-            if end_total_minutes <= start_total_minutes:
-                raise ValueError("End time must be after start time")
-                
-        except (ValueError, AttributeError) as e:
-            error_msg = str(e) if "must" in str(e) else "Invalid time_slot format"
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"{error_msg}. Use 'HH:MM-HH:MM' format (e.g., '09:00-10:30')"
-            )
+        _validate_time_slot_format(class_data.time_slot)
     
     try:
         new_class = ClassModel(
@@ -291,3 +304,76 @@ def register_student_to_class(db: Session, class_id: int, student_id: int) -> Cl
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Database error: {str(e)}"
         )
+
+
+def update_class(db: Session, class_id: int, class_data: "ClassUpdate") -> ClassModel:
+    """
+    Update class information.
+    
+    Args:
+        db: Database session
+        class_id: Class ID to update
+        class_data: ClassUpdate schema with updated fields
+        
+    Returns:
+        Updated class object
+        
+    Raises:
+        HTTPException: If class not found or time_slot format invalid
+    """
+    class_obj = db.query(ClassModel).filter(ClassModel.id == class_id).first()
+    
+    if not class_obj:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Class not found"
+        )
+    
+    # Validate time_slot format if provided
+    if class_data.time_slot is not None:
+        _validate_time_slot_format(class_data.time_slot)
+        class_obj.time_slot = class_data.time_slot
+    
+    # Update other fields
+    if class_data.name is not None:
+        class_obj.name = class_data.name
+    if class_data.subject is not None:
+        class_obj.subject = class_data.subject
+    if class_data.day_of_week is not None:
+        class_obj.day_of_week = class_data.day_of_week
+    if class_data.teacher_name is not None:
+        class_obj.teacher_name = class_data.teacher_name
+    if class_data.max_students is not None:
+        class_obj.max_students = class_data.max_students
+    
+    db.commit()
+    db.refresh(class_obj)
+    
+    return class_obj
+
+
+def unregister_student_from_class(db: Session, class_id: int, student_id: int) -> None:
+    """
+    Remove a student's registration from a class.
+    
+    Args:
+        db: Database session
+        class_id: Class ID
+        student_id: Student ID to remove
+        
+    Raises:
+        HTTPException: If registration not found
+    """
+    registration = db.query(ClassRegistration).filter(
+        ClassRegistration.class_id == class_id,
+        ClassRegistration.student_id == student_id
+    ).first()
+    
+    if not registration:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Registration not found"
+        )
+    
+    db.delete(registration)
+    db.commit()

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../../services/api';
 import type { Subscription, Student } from '../../types';
+import EditSubscriptionModal from './EditSubscriptionModal';
 
 const SubscriptionsManagement = () => {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
@@ -19,6 +20,10 @@ const SubscriptionsManagement = () => {
   });
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Edit subscription modal state
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
 
   useEffect(() => {
     fetchSubscriptions();
@@ -58,6 +63,29 @@ const SubscriptionsManagement = () => {
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to delete subscription');
     }
+  };
+
+  const handleEditClick = (subscription: Subscription) => {
+    setEditingSubscription(subscription);
+    setShowEditModal(true);
+  };
+
+  const handleEditSubscription = async (formData: any) => {
+    if (!editingSubscription) return;
+
+    try {
+      const response = await api.patch(`/subscriptions/${editingSubscription.id}`, formData);
+      setSubscriptions(subscriptions.map(s => s.id === editingSubscription.id ? response.data : s));
+      setShowEditModal(false);
+      setEditingSubscription(null);
+    } catch (err: any) {
+      throw err; // Let the modal handle the error
+    }
+  };
+
+  const handleCloseEditModal = () => {
+    setShowEditModal(false);
+    setEditingSubscription(null);
   };
 
   const handleUseSession = async (subscriptionId: number) => {
@@ -273,6 +301,15 @@ const SubscriptionsManagement = () => {
                         </svg>
                       </button>
                       <button
+                        onClick={() => handleEditClick(subscription)}
+                        className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition"
+                        title="Edit subscription"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      </button>
+                      <button
                         onClick={() => handleDeleteSubscription(subscription.id, subscription.package_name)}
                         className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition"
                         title="Delete subscription"
@@ -401,6 +438,15 @@ const SubscriptionsManagement = () => {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Edit Subscription Modal */}
+      {showEditModal && editingSubscription && (
+        <EditSubscriptionModal
+          subscription={editingSubscription}
+          onClose={handleCloseEditModal}
+          onSubmit={handleEditSubscription}
+        />
       )}
     </div>
   );

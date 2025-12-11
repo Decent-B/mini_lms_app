@@ -13,7 +13,7 @@ from app.models.user import User, UserRole
 from app.models.parent import Parent
 from app.models.class_model import ClassModel
 from app.models.class_registration import ClassRegistration
-from app.schemas.student import StudentCreate
+from app.schemas.student import StudentCreate, StudentUpdate
 from app.core.security import get_password_hash
 
 
@@ -183,3 +183,82 @@ def delete_student(db: Session, student_id: int) -> None:
         db.delete(user)
     
     db.commit()
+
+
+def get_student_by_user_id(db: Session, user_id: int) -> Student:
+    """
+    Get student by their user ID.
+    
+    Args:
+        db: Database session
+        user_id: User ID
+        
+    Returns:
+        Student object with relationships loaded
+        
+    Raises:
+        HTTPException: If student not found
+    """
+    student = db.query(Student).filter(Student.user_id == user_id).first()
+    
+    if not student:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Student not found"
+        )
+    
+    return student
+
+
+def update_student(db: Session, student_id: int, student_data: "StudentUpdate") -> Student:
+    """
+    Update student information.
+    
+    Args:
+        db: Database session
+        student_id: Student ID to update
+        student_data: StudentUpdate schema with updated fields
+        
+    Returns:
+        Updated student object
+        
+    Raises:
+        HTTPException: If student not found or parent not found
+    """
+    student = db.query(Student).filter(Student.id == student_id).first()
+    
+    if not student:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Student not found"
+        )
+    
+    # Validate parent_id if provided
+    if student_data.parent_id is not None:
+        from app.models.parent import Parent
+        parent = db.query(Parent).filter(Parent.id == student_data.parent_id).first()
+        if not parent:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Parent not found"
+            )
+        student.parent_id = student_data.parent_id
+    
+    # Update student fields
+    if student_data.dob is not None:
+        student.dob = student_data.dob.isoformat()  # type: ignore
+    if student_data.gender is not None:
+        student.gender = student_data.gender
+    if student_data.current_grade is not None:
+        student.current_grade = student_data.current_grade
+    
+    # Update user name if provided
+    if student_data.name is not None:
+        user = db.query(User).filter(User.id == student.user_id).first()
+        if user:
+            user.name = student_data.name
+    
+    db.commit()
+    db.refresh(student)
+    
+    return student

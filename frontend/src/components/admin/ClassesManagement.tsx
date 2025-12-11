@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../../services/api';
 import type { Class, Student } from '../../types';
+import EditClassModal from './EditClassModal';
 
 interface TimeSlot {
   start: number; // minutes from midnight
@@ -41,6 +42,15 @@ const ClassesManagement = () => {
   });
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Edit class modal state
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingClass, setEditingClass] = useState<Class | null>(null);
+
+  // Student management state
+  const [allStudents, setAllStudents] = useState<Student[]>([]);
+  const [addingStudent, setAddingStudent] = useState(false);
+  const [selectedStudentId, setSelectedStudentId] = useState('');
 
   const weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
   const startHour = 8; // 8 AM
@@ -251,6 +261,78 @@ const ClassesManagement = () => {
     }
   };
 
+  const handleEditClick = (classData: Class) => {
+    setEditingClass(classData);
+    setShowEditModal(true);
+  };
+
+  const handleEditClass = async (formData: any) => {
+    if (!editingClass) return;
+
+    try {
+      const response = await api.patch(`/classes/${editingClass.id}`, formData);
+      setClasses(classes.map(c => c.id === editingClass.id ? response.data : c));
+      // Update selectedClass if it's the one being edited
+      if (selectedClass && selectedClass.id === editingClass.id) {
+        setSelectedClass({ ...selectedClass, ...response.data });
+      }
+      setShowEditModal(false);
+      setEditingClass(null);
+    } catch (err: any) {
+      throw err; // Let the modal handle the error
+    }
+  };
+
+  const handleCloseEditModal = () => {
+    setShowEditModal(false);
+    setEditingClass(null);
+  };
+
+  // Fetch all students for adding to classes
+  useEffect(() => {
+    const fetchAllStudents = async () => {
+      try {
+        const response = await api.get<Student[]>('/students');
+        setAllStudents(response.data);
+      } catch (err) {
+        console.error('Failed to fetch students:', err);
+      }
+    };
+    fetchAllStudents();
+  }, []);
+
+  const handleAddStudentToClass = async () => {
+    if (!selectedClass || !selectedStudentId) return;
+
+    try {
+      setAddingStudent(true);
+      await api.post(`/classes/${selectedClass.id}/register`, { student_id: parseInt(selectedStudentId) });
+      // Refresh class details
+      await fetchClassDetails(selectedClass.id);
+      setSelectedStudentId('');
+    } catch (err: any) {
+      setError(err.response?.data?.detail || 'Failed to add student to class');
+    } finally {
+      setAddingStudent(false);
+    }
+  };
+
+  const handleRemoveStudentFromClass = async (studentId: number, studentName: string) => {
+    if (!selectedClass) return;
+    
+    if (!window.confirm(`Remove ${studentName} from ${selectedClass.name}?`)) {
+      return;
+    }
+
+    try {
+      await api.delete(`/classes/${selectedClass.id}/registrations/${studentId}`);
+      // Refresh class details
+      await fetchClassDetails(selectedClass.id);
+    } catch (err: any) {
+      setError(err.response?.data?.detail || 'Failed to remove student from class');
+    }
+  };
+
   const handleCloseAddModal = () => {
     setShowAddModal(false);
     setFormData({
@@ -442,14 +524,25 @@ const ClassesManagement = () => {
           <div className="bg-white rounded-xl shadow-2xl p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-start mb-6">
               <h3 className="text-2xl font-bold text-slate-800">{selectedClass.name}</h3>
-              <button
-                onClick={() => setShowModal(false)}
-                className="text-slate-400 hover:text-slate-600 transition"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleEditClick(selectedClass)}
+                  className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition"
+                  title="Edit class"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="text-slate-400 hover:text-slate-600 transition"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
             </div>
 
             {loadingDetails ? (
@@ -506,10 +599,47 @@ const ClassesManagement = () => {
                               {student.current_grade && <span>📚 {student.current_grade}</span>}
                             </div>
                           </div>
+                          <button
+                            onClick={() => handleRemoveStudentFromClass(student.id, student.user.name)}
+                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition"
+                            title="Remove student from class"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
                         </div>
                       ))}
                     </div>
                   )}
+
+                  {/* Add Student to Class */}
+                  <div className="mt-4 pt-4 border-t border-slate-200">
+                    <h5 className="text-sm font-semibold text-slate-700 mb-2">Add Student</h5>
+                    <div className="flex gap-2">
+                      <select
+                        value={selectedStudentId}
+                        onChange={(e) => setSelectedStudentId(e.target.value)}
+                        className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        <option value="">Select a student...</option>
+                        {allStudents
+                          .filter(s => !selectedClass.enrolled_students.some(es => es.id === s.id))
+                          .map(student => (
+                            <option key={student.id} value={student.id}>
+                              {student.user.name}
+                            </option>
+                          ))}
+                      </select>
+                      <button
+                        onClick={handleAddStudentToClass}
+                        disabled={!selectedStudentId || addingStudent}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                      >
+                        {addingStudent ? 'Adding...' : 'Add'}
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="flex justify-end mt-6">
@@ -647,6 +777,15 @@ const ClassesManagement = () => {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Edit Class Modal */}
+      {showEditModal && editingClass && (
+        <EditClassModal
+          classData={editingClass}
+          onClose={handleCloseEditModal}
+          onSubmit={handleEditClass}
+        />
       )}
     </div>
   );
