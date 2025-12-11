@@ -13,6 +13,19 @@ from app.services import subscription_service
 router = APIRouter(prefix="/api/subscriptions", tags=["subscriptions"])
 
 
+@router.get("", response_model=list[SubscriptionResponse])
+def get_all_subscriptions(
+    db: Annotated[Session, Depends(get_db)]
+):
+    """
+    Get all subscriptions.
+    
+    Returns a list of all subscriptions with student information.
+    """
+    subscriptions = subscription_service.get_all_subscriptions(db)
+    return subscriptions
+
+
 @router.post("", response_model=SubscriptionResponse, status_code=status.HTTP_201_CREATED)
 def create_subscription(
     subscription_data: SubscriptionCreate,
@@ -62,3 +75,17 @@ def get_subscription(
     """
     subscription = subscription_service.get_subscription_by_id(db, subscription_id)
     return subscription
+
+
+@router.delete("/{subscription_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_subscription(
+    subscription_id: int,
+    db: Annotated[Session, Depends(get_db)]
+):
+    """
+    Delete a subscription.
+    
+    Removes the subscription from the database.
+    """
+    subscription_service.delete_subscription(db, subscription_id)
+    return None

@@ -7,6 +7,8 @@ Defines request/response structures for subscription management operations.
 from datetime import date
 from pydantic import BaseModel, Field, field_validator, ValidationInfo
 
+from app.schemas.student import StudentResponse
+
 
 # Base schema with common fields
 class SubscriptionBase(BaseModel):
@@ -55,6 +57,7 @@ class SubscriptionResponse(SubscriptionBase):
     used_sessions: int
     remaining_sessions: int
     is_active: bool
+    student: StudentResponse  # Include full student information
 
     model_config = {"from_attributes": True}
 

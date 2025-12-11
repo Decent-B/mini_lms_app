@@ -127,6 +127,7 @@ export interface Subscription {
   used_sessions: number;
   remaining_sessions: number;
   is_active: boolean;
+  student: Student; // Full student information
 }
 
 export interface SubscriptionCreate {

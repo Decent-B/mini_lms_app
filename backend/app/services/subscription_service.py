@@ -161,3 +161,40 @@ def get_subscription_by_id(db: Session, subscription_id: int) -> Subscription:
         )
     
     return subscription
+
+
+def get_all_subscriptions(db: Session) -> list[Subscription]:
+    """
+    Get all subscriptions.
+    
+    Args:
+        db: Database session
+        
+    Returns:
+        List of all subscriptions with student relationships loaded
+    """
+    subscriptions = db.query(Subscription).all()
+    return subscriptions
+
+
+def delete_subscription(db: Session, subscription_id: int) -> None:
+    """
+    Delete a subscription.
+    
+    Args:
+        db: Database session
+        subscription_id: Subscription ID
+        
+    Raises:
+        HTTPException: If subscription not found
+    """
+    subscription = db.query(Subscription).filter(Subscription.id == subscription_id).first()
+    
+    if not subscription:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Subscription not found"
+        )
+    
+    db.delete(subscription)
+    db.commit()

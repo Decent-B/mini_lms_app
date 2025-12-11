@@ -935,7 +935,70 @@ curl -X POST http://localhost:8000/api/classes/1/register \
 
 ## Subscription Management APIs
 
-### 8. Create Subscription
+### 8. Get All Subscriptions
+
+**Endpoint:** `GET /api/subscriptions`
+
+**Description:** Retrieves a list of all subscriptions with full student information.
+
+**Authentication:** Required (Bearer token)
+
+**Request Example:**
+```bash
+curl http://localhost:8000/api/subscriptions \
+  -H "Authorization: Bearer <access_token>"
+```
+
+**Response (200 OK):**
+```json
+[
+  {
+    "student_id": 1,
+    "package_name": "Monthly Premium Package",
+    "start_date": "2025-01-01",
+    "end_date": "2025-12-31",
+    "total_sessions": 48,
+    "id": 1,
+    "used_sessions": 5,
+    "remaining_sessions": 43,
+    "is_active": true,
+    "student": {
+      "dob": "2010-03-15",
+      "gender": "Female",
+      "current_grade": "Grade 8",
+      "parent_id": 1,
+      "id": 1,
+      "user_id": 9,
+      "user": {
+        "name": "Emma Smith",
+        "email": "emma.smith@email.com",
+        "id": 9,
+        "role": "student"
+      }
+    }
+  }
+]
+```
+
+**Response Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| Array | array | List of subscription objects |
+| `id` | integer | Subscription ID |
+| `student_id` | integer | Student ID |
+| `package_name` | string | Package name |
+| `start_date` | string | Start date (ISO format) |
+| `end_date` | string | End date (ISO format) |
+| `total_sessions` | integer | Total sessions |
+| `used_sessions` | integer | Sessions used |
+| `remaining_sessions` | integer | Remaining sessions |
+| `is_active` | boolean | Active status |
+| `student` | object | Full student information with user details |
+
+---
+
+### 9. Create Subscription
 
 **Endpoint:** `POST /api/subscriptions`
 
@@ -1014,7 +1077,7 @@ curl -X POST http://localhost:8000/api/subscriptions \
 
 ---
 
-### 9. Get Subscription by ID
+### 10. Get Subscription by ID
 
 **Endpoint:** `GET /api/subscriptions/{subscription_id}`
 
@@ -1055,7 +1118,7 @@ curl http://localhost:8000/api/subscriptions/1
 
 ---
 
-### 10. Use Subscription Session
+### 11. Use Subscription Session
 
 **Endpoint:** `PATCH /api/subscriptions/{subscription_id}/use`
 
@@ -1118,6 +1181,46 @@ curl -X PATCH http://localhost:8000/api/subscriptions/1/use \
 - Decrements `remaining_sessions` automatically (calculated field)
 - Auto-deactivates subscription when `used_sessions >= total_sessions`
 - Cannot use sessions if subscription is expired (end_date < today)
+
+---
+
+### 12. Delete Subscription
+
+**Endpoint:** `DELETE /api/subscriptions/{subscription_id}`
+
+**Description:** Delete a subscription by its ID.
+
+**Authentication Required:** Yes (Staff only)
+
+**Path Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `subscription_id` | integer | Yes | The ID of the subscription to delete |
+
+**Request Example:**
+```bash
+curl -X DELETE http://localhost:8000/api/subscriptions/1 \
+  -H "Authorization: Bearer <token>"
+```
+
+**Response (204 No Content):**
+```
+(Empty response body)
+```
+
+**Error Responses:**
+
+| Status Code | Condition | Response Example |
+|-------------|-----------|------------------|
+| 404 | Subscription not found | `{"detail": "Subscription not found"}` |
+| 401 | Not authenticated | `{"detail": "Not authenticated"}` |
+| 403 | Not authorized (non-staff) | `{"detail": "Not authorized"}` |
+
+**Notes:**
+- Returns 204 No Content on successful deletion
+- Deletes the subscription record from the database
+- No cascade effects (students are not deleted)
 
 ---
 
