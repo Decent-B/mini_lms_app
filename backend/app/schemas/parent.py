@@ -4,9 +4,24 @@ Pydantic schemas for Parent model.
 Defines request/response structures for parent management operations.
 """
 
+from datetime import date
+
 from pydantic import BaseModel, Field
 
 from app.schemas.user import UserResponse
+
+
+# Forward declaration for Student
+class StudentBasic(BaseModel):
+    """Basic student information for parent response."""
+    id: int
+    user_id: int
+    dob: date | None = None
+    gender: str | None = None
+    current_grade: str | None = None
+    user: UserResponse
+
+    model_config = {"from_attributes": True}
 
 
 # Base schema with common fields
@@ -37,5 +52,13 @@ class ParentResponse(ParentBase):
     id: int
     user_id: int
     user: UserResponse
+
+    model_config = {"from_attributes": True}
+
+
+# Schema for parent with children
+class ParentWithChildren(ParentResponse):
+    """Schema for parent with children list."""
+    students: list[StudentBasic] = []
 
     model_config = {"from_attributes": True}

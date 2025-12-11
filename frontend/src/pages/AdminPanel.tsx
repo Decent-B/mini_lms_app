@@ -1,59 +1,74 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-export default function AdminPanel(): React.JSX.Element {
+const AdminPanel = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
+  const menuItems = [
+    { id: 'parents', label: 'Parents', path: '/admin/parents' },
+    { id: 'students', label: 'Students', path: '/admin/students' },
+    { id: 'classes', label: 'Classes', path: '/admin/classes' },
+    { id: 'subscriptions', label: 'Subscriptions', path: '/admin/subscriptions' },
+  ];
+
+  const handleMenuClick = (path: string) => {
+    navigate(path);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-200">
       {/* Header */}
-      <header className="bg-white shadow">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-6 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-            Admin Panel
-          </h1>
-          <div className="flex items-center gap-4">
-            <div className="text-sm">
-              <p className="font-medium text-gray-900">{user?.name}</p>
-              <p className="text-gray-500">{user?.email}</p>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-            >
-              Logout
-            </button>
+      <header className="bg-white shadow-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-800">Mini LMS Admin Panel</h1>
+            <p className="text-sm text-slate-600">Welcome, {user?.name}</p>
           </div>
+          <button
+            onClick={handleLogout}
+            className="px-6 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg shadow-lg hover:from-red-600 hover:to-red-700 transition duration-300 transform hover:scale-105"
+          >
+            Logout
+          </button>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main>
-        <div className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
-          <div className="px-4 py-6 sm:px-0">
-            <div className="rounded-lg border-4 border-dashed border-gray-200 p-12 text-center">
-              <h2 className="text-4xl font-bold text-gray-800">
-                Hello World!
-              </h2>
-              <p className="mt-4 text-lg text-gray-600">
-                Welcome to the Mini LMS Admin Panel, {user?.name}
-              </p>
-              <div className="mt-6">
-                <span className="inline-flex items-center rounded-full bg-green-100 px-3 py-0.5 text-sm font-medium text-green-800">
-                  Role: {user?.role}
-                </span>
-              </div>
-            </div>
-          </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex gap-6">
+          {/* Sidebar Menu */}
+          <aside className="w-64 bg-white rounded-xl shadow-lg p-6">
+            <nav className="space-y-2">
+              {menuItems.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => handleMenuClick(item.path)}
+                  className={`w-full text-left px-4 py-3 rounded-lg transition duration-200 ${
+                    location.pathname === item.path
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md'
+                      : 'text-slate-700 hover:bg-slate-100'
+                  }`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </nav>
+          </aside>
+
+          {/* Main Content Area */}
+          <main className="flex-1 bg-white rounded-xl shadow-lg p-6">
+            <Outlet />
+          </main>
         </div>
-      </main>
+      </div>
     </div>
   );
-}
+};
+
+export default AdminPanel;

@@ -89,3 +89,43 @@ def get_parent_by_id(db: Session, parent_id: int) -> Parent:
         )
     
     return parent
+
+
+def get_all_parents(db: Session) -> list[Parent]:
+    """
+    Get all parents with user information.
+    
+    Args:
+        db: Database session
+        
+    Returns:
+        List of parent objects
+    """
+    parents = db.query(Parent).all()
+    return parents
+
+
+def delete_parent(db: Session, parent_id: int) -> None:
+    """
+    Delete a parent by ID.
+    
+    Also deletes the associated user account (cascade).
+    
+    Args:
+        db: Database session
+        parent_id: Parent ID to delete
+        
+    Raises:
+        HTTPException: If parent not found
+    """
+    parent = db.query(Parent).filter(Parent.id == parent_id).first()
+    
+    if not parent:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Parent not found"
+        )
+    
+    # Delete user (will cascade to parent due to foreign key)
+    db.query(User).filter(User.id == parent.user_id).delete()
+    db.commit()

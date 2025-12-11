@@ -164,11 +164,67 @@ curl -X POST http://localhost:8000/api/parents \
 
 ---
 
-### 2. Get Parent by ID
+### 2. Get All Parents
+
+**Endpoint:** `GET /api/parents`
+
+**Description:** Retrieves a list of all parents with their user information.
+
+**Authentication:** Required (Bearer token)
+
+**Request Example:**
+```bash
+curl http://localhost:8000/api/parents \
+  -H "Authorization: Bearer <access_token>"
+```
+
+**Response (200 OK):**
+```json
+[
+  {
+    "phone": "+84901234567",
+    "id": 1,
+    "user_id": 1,
+    "user": {
+      "name": "John Doe",
+      "email": "johndoe@example.com",
+      "id": 1,
+      "role": "parent"
+    }
+  },
+  {
+    "phone": "+84987654321",
+    "id": 2,
+    "user_id": 2,
+    "user": {
+      "name": "Jane Smith",
+      "email": "janesmith@example.com",
+      "id": 2,
+      "role": "parent"
+    }
+  }
+]
+```
+
+**Response Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| Array | array | List of parent objects |
+| `id` | integer | Parent record ID |
+| `user_id` | integer | Associated user record ID |
+| `phone` | string \| null | Parent's phone number |
+| `user` | object | Nested user information |
+
+---
+
+### 3. Get Parent by ID
 
 **Endpoint:** `GET /api/parents/{parent_id}`
 
-**Description:** Retrieves parent information by parent ID.
+**Description:** Retrieves parent information by parent ID, including their children.
+
+**Authentication:** Required (Bearer token)
 
 **Path Parameters:**
 
@@ -195,6 +251,38 @@ curl http://localhost:8000/api/parents/1
   }
 }
 ```
+
+**Error Responses:**
+
+| Status Code | Condition | Response Example |
+|-------------|-----------|------------------|
+| 404 | Parent not found | `{"detail": "Parent not found"}` |
+| 422 | Invalid ID format | `{"detail": [{"type": "int_parsing", "loc": ["path", "parent_id"], "msg": "Input should be a valid integer"}]}` |
+
+---
+
+### 4. Delete Parent
+
+**Endpoint:** `DELETE /api/parents/{parent_id}`
+
+**Description:** Deletes a parent record and their associated user account. This is a cascade delete operation.
+
+**Authentication:** Required (Bearer token)
+
+**Path Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `parent_id` | integer | Yes | The ID of the parent to delete |
+
+**Request Example:**
+```bash
+curl -X DELETE http://localhost:8000/api/parents/1 \
+  -H "Authorization: Bearer <your_token>"
+```
+
+**Response (204 No Content):**
+No response body on success.
 
 **Error Responses:**
 

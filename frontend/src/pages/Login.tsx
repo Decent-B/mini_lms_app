@@ -27,7 +27,7 @@ export default function Login(): React.JSX.Element {
 
     try {
       const credentials: LoginCredentials = { email, password };
-      const response = await api.post<AuthResponse>('/api/auth/login', credentials);
+      const response = await api.post<AuthResponse>('/auth/login', credentials);
       
       const { access_token, user } = response.data;
       

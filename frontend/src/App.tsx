@@ -4,6 +4,10 @@ import ProtectedRoute from './components/ProtectedRoute';
 import RootRedirect from './components/RootRedirect';
 import Login from './pages/Login';
 import AdminPanel from './pages/AdminPanel';
+import ParentsManagement from './components/admin/ParentsManagement';
+import StudentsManagement from './components/admin/StudentsManagement';
+import ClassesManagement from './components/admin/ClassesManagement';
+import SubscriptionsManagement from './components/admin/SubscriptionsManagement';
 import './App.css';
 
 function App() {
@@ -21,7 +25,14 @@ function App() {
                   <AdminPanel />
                 </ProtectedRoute>
               }
-            />
+            >
+              {/* Nested routes for admin sections */}
+              <Route index element={<Navigate to="/admin/parents" replace />} />
+              <Route path="parents" element={<ParentsManagement />} />
+              <Route path="students" element={<StudentsManagement />} />
+              <Route path="classes" element={<ClassesManagement />} />
+              <Route path="subscriptions" element={<SubscriptionsManagement />} />
+            </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
