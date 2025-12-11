@@ -6,12 +6,87 @@ http://localhost:8000
 ```
 
 ## Table of Contents
-1. [Parent Management APIs](#parent-management-apis)
-2. [Student Management APIs](#student-management-apis)
-3. [Class Management APIs](#class-management-apis)
-4. [Class Registration APIs](#class-registration-apis)
-5. [Subscription Management APIs](#subscription-management-apis)
-6. [Common Error Responses](#common-error-responses)
+1. [Authentication APIs](#authentication-apis)
+2. [Parent Management APIs](#parent-management-apis)
+3. [Student Management APIs](#student-management-apis)
+4. [Class Management APIs](#class-management-apis)
+5. [Class Registration APIs](#class-registration-apis)
+6. [Subscription Management APIs](#subscription-management-apis)
+7. [Common Error Responses](#common-error-responses)
+
+---
+
+## Authentication APIs
+
+### 1. User Login
+
+**Endpoint:** `POST /api/auth/login`
+
+**Description:** Authenticates a user and returns a JWT access token for subsequent API requests.
+
+**Request Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `email` | string | Yes | User's email address |
+| `password` | string | Yes | User's password |
+
+**Request Example:**
+```bash
+curl -X POST http://localhost:8000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "admin@example.com",
+    "password": "SecurePass123!"
+  }'
+```
+
+**Response (200 OK):**
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "bearer",
+  "user": {
+    "id": 1,
+    "name": "Admin User",
+    "email": "admin@example.com",
+    "role": "staff"
+  }
+}
+```
+
+**Response Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `access_token` | string | JWT token for authenticated requests |
+| `token_type` | string | Token type (always "bearer") |
+| `user` | object | Authenticated user information |
+| `user.id` | integer | User ID |
+| `user.name` | string | User's full name |
+| `user.email` | string | User's email |
+| `user.role` | string | User role ("staff", "parent", or "student") |
+
+**Error Responses:**
+
+| Status Code | Condition | Response Example |
+|-------------|-----------|------------------|
+| 401 | Invalid email or password | `{"detail": "Incorrect email or password"}` |
+| 422 | Missing required field | `{"detail": [{"type": "missing", "loc": ["body", "email"], "msg": "Field required"}]}` |
+
+**Authentication:**
+- No authentication required for this endpoint
+- The returned access token should be included in subsequent requests using the `Authorization: Bearer <token>` header
+
+**Token Usage Example:**
+```bash
+curl -X GET http://localhost:8000/api/parents/1 \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+**Token Expiration:**
+- Tokens expire after the configured duration (default: 30 minutes)
+- Upon expiration, clients must re-authenticate to obtain a new token
 
 ---
 

@@ -12,7 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.core.database import engine, Base
-from app.routers import parents, students, classes, subscriptions
+from app.routers import auth, parents, students, classes, subscriptions
 
 
 @asynccontextmanager
@@ -47,6 +47,7 @@ app.add_middleware(
 )
 
 # Include routers
+app.include_router(auth.router)
 app.include_router(parents.router)
 app.include_router(students.router)
 app.include_router(classes.router)
