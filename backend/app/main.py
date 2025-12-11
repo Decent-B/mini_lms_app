@@ -16,7 +16,7 @@ from app.routers import auth, parents, students, classes, subscriptions
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI): # pyright: ignore[reportUnusedParameter]
+async def lifespan(app: FastAPI):
     """
     Application lifespan handler.
     

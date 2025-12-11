@@ -6,5 +6,6 @@
     "reportUnknownMemberType": "none",
     "reportUnknownParameterType": "none",
     "reportImportCycles": "none",
-    "reportExplicitAny": "none"
+    "reportExplicitAny": "none",
+    "reportUnusedParameter": "none"
 }
