@@ -31,17 +31,16 @@ export default function Login(): React.JSX.Element {
       
       const { access_token, user } = response.data;
       
-      // Check if user has staff role
-      if (user.role !== 'staff') {
-        setError('Access denied. Only staff members can login to this portal.');
-        setIsLoading(false);
-        return;
-      }
-      
       login(access_token, user);
       
-      // Navigate to admin panel
-      navigate('/admin');
+      // Navigate based on user role
+      if (user.role === 'staff') {
+        navigate('/admin');
+      } else if (user.role === 'parent') {
+        navigate('/parent/dashboard');
+      } else if (user.role === 'student') {
+        navigate('/student/dashboard');
+      }
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Login failed. Please check your credentials.');
     } finally {
