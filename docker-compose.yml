@@ -44,24 +44,18 @@ services:
     networks:
       - mini_lms_network
 
-  # frontend:
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: Dockerfile
-  #   container_name: mini_lms_frontend
-  #   restart: unless-stopped
-  #   ports:
-  #     - "${FRONTEND_PORT:-3000}:3000"
-  #   environment:
-  #     - VITE_API_URL=http://localhost:${BACKEND_PORT:-8000}
-  #   depends_on:
-  #     - backend
-  #   volumes:
-  #     - ./frontend:/app
-  #     - /app/node_modules
-  #   command: npm run dev -- --host
-  #   networks:
-  #     - mini_lms_network
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: mini_lms_frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-80}:80"
+    depends_on:
+      - backend
+    networks:
+      - mini_lms_network
 
 volumes:
   postgres_data:
