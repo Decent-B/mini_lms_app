@@ -13,8 +13,8 @@ class SubscriptionBase(BaseModel):
     """Base subscription schema with shared fields."""
     student_id: int = Field(..., gt=0)
     package_name: str = Field(..., min_length=1, max_length=255)
-    start_date: date | None = None
-    end_date: date | None = None
+    start_date: date
+    end_date: date
     total_sessions: int = Field(..., ge=1)
 
 

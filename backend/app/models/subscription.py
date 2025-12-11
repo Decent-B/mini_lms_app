@@ -40,6 +40,7 @@ class Subscription(Base):
     end_date: Mapped[str | None] = mapped_column(Date, nullable=True)
     total_sessions: Mapped[int] = mapped_column(Integer, nullable=False)
     used_sessions: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
 
     # Relationships
     student: Mapped["Student"] = relationship(back_populates="subscriptions")
@@ -52,8 +53,3 @@ class Subscription(Base):
     def remaining_sessions(self) -> int:
         """Calculate remaining sessions."""
         return self.total_sessions - self.used_sessions
-    
-    @property
-    def is_active(self) -> bool:
-        """Check if subscription has remaining sessions."""
-        return self.remaining_sessions > 0

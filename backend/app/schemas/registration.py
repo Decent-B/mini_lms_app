@@ -15,9 +15,9 @@ class RegistrationBase(BaseModel):
 
 
 # Schema for registration creation
-class RegistrationCreate(RegistrationBase):
-    """Schema for creating a new class registration."""
-    pass
+class RegistrationCreate(BaseModel):
+    """Schema for creating a new class registration (class_id comes from URL path)."""
+    student_id: int = Field(..., gt=0)
 
 
 # Schema for registration response
