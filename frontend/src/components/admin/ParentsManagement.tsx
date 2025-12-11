@@ -125,12 +125,17 @@ const ParentsManagement = () => {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-slate-800">Parents Management</h2>
+        <div>
+          <h2 className="text-3xl font-bold text-slate-800">Parents Management</h2>
+          <p className="text-slate-600 mt-1">Manage parent accounts and view their children</p>
+        </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="px-6 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg shadow-lg hover:from-green-600 hover:to-green-700 transition duration-300 transform hover:scale-105 flex items-center gap-2"
+          className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg shadow-lg hover:from-green-600 hover:to-green-700 transition flex items-center gap-2"
         >
-          <span className="text-xl">+</span>
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
           Add Parent
         </button>
       </div>
@@ -142,77 +147,85 @@ const ParentsManagement = () => {
       )}
 
       {parents.length === 0 ? (
-        <div className="text-center py-12 text-slate-500">
-          No parents found. Click "Add Parent" to create one.
+        <div className="text-center py-12 bg-slate-50 rounded-xl">
+          <p className="text-slate-600 text-lg">No parents found. Add your first parent!</p>
         </div>
       ) : (
         <div className="space-y-3">
           {parents.map((parent) => (
             <div
               key={parent.id}
-              className="border border-slate-200 rounded-lg overflow-hidden hover:shadow-md transition duration-200"
+              className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition hover:shadow-md"
             >
-              {/* Parent Row */}
-              <div className="bg-white p-4 flex items-center justify-between">
-                <div className="flex items-center gap-4 flex-1">
-                  <button
-                    onClick={() => handleToggleChildren(parent.id)}
-                    className="text-slate-600 hover:text-blue-600 transition"
-                  >
-                    {loadingChildren[parent.id] ? (
-                      <div className="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full"></div>
-                    ) : (
-                      <svg
-                        className={`w-5 h-5 transition-transform ${
-                          expandedParentId === parent.id ? 'rotate-90' : ''
-                        }`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    )}
-                  </button>
-
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-slate-800">{parent.user.name}</h3>
-                    <div className="flex gap-4 text-sm text-slate-600 mt-1">
-                      <span>📧 {parent.user.email}</span>
-                      {parent.phone && <span>📱 {parent.phone}</span>}
+              {/* Parent Header */}
+              <div className="flex items-center justify-between p-5">
+                <div 
+                  className="flex-1 cursor-pointer"
+                  onClick={() => handleToggleChildren(parent.id)}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                      {parent.user.name.charAt(0).toUpperCase()}
                     </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-slate-800">{parent.user.name}</h3>
+                      <div className="flex flex-wrap gap-3 text-sm text-slate-600 mt-1">
+                        <span>📧 {parent.user.email}</span>
+                        {parent.phone && <span>📱 {parent.phone}</span>}
+                      </div>
+                    </div>
+                    <button
+                      className={`ml-4 transition-transform ${
+                        expandedParentId === parent.id ? 'rotate-180' : ''
+                      }`}
+                    >
+                      <svg className="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
                   </div>
                 </div>
 
                 <button
                   onClick={() => handleDeleteParent(parent.id, parent.user.name)}
-                  className="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg shadow hover:from-red-600 hover:to-red-700 transition duration-300 transform hover:scale-105"
+                  className="ml-4 p-2 text-red-500 hover:bg-red-50 rounded-lg transition"
+                  title="Delete parent"
                 >
-                  Delete
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
                 </button>
               </div>
 
-              {/* Children Dropdown */}
-              {expandedParentId === parent.id && childrenData[parent.id] && (
-                <div className="bg-slate-50 border-t border-slate-200 p-4">
-                  <h4 className="font-semibold text-slate-700 mb-2">Children:</h4>
-                  {childrenData[parent.id].length === 0 ? (
-                    <p className="text-sm text-slate-500">No children registered</p>
+              {/* Expandable Children */}
+              {expandedParentId === parent.id && (
+                <div className="border-t border-slate-200 p-5 bg-slate-50">
+                  {loadingChildren[parent.id] ? (
+                    <div className="flex justify-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                    </div>
+                  ) : !childrenData[parent.id] || childrenData[parent.id].length === 0 ? (
+                    <p className="text-sm text-slate-500 text-center py-4">No children registered</p>
                   ) : (
-                    <div className="space-y-2">
-                      {childrenData[parent.id].map((student) => (
-                        <div
-                          key={student.id}
-                          className="bg-white p-3 rounded-lg shadow-sm"
-                        >
-                          <p className="font-medium text-slate-800">{student.user.name}</p>
-                          <div className="flex gap-3 text-sm text-slate-600 mt-1">
-                            <span>📧 {student.user.email}</span>
-                            {student.current_grade && <span>📚 {student.current_grade}</span>}
-                            {student.dob && <span>🎂 {new Date(student.dob).toLocaleDateString()}</span>}
+                    <div className="bg-white rounded-lg p-4">
+                      <h4 className="font-semibold text-slate-800 mb-4">
+                        Children ({childrenData[parent.id].length})
+                      </h4>
+                      <div className="space-y-3">
+                        {childrenData[parent.id].map((student) => (
+                          <div
+                            key={student.id}
+                            className="bg-slate-50 p-3 rounded-lg"
+                          >
+                            <p className="font-medium text-slate-800">{student.user.name}</p>
+                            <div className="flex flex-wrap gap-3 text-sm text-slate-600 mt-1">
+                              <span>📧 {student.user.email}</span>
+                              {student.current_grade && <span>📚 {student.current_grade}</span>}
+                              {student.dob && <span>🎂 {new Date(student.dob).toLocaleDateString()}</span>}
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>

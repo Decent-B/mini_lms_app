@@ -299,12 +299,17 @@ const ClassesManagement = () => {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-slate-800">Classes Timetable</h2>
+        <div>
+          <h2 className="text-3xl font-bold text-slate-800">Classes Timetable</h2>
+          <p className="text-slate-600 mt-1">View and manage class schedules across the week</p>
+        </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="px-6 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg shadow-lg hover:from-green-600 hover:to-green-700 transition duration-300 transform hover:scale-105 flex items-center gap-2"
+          className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg shadow-lg hover:from-green-600 hover:to-green-700 transition flex items-center gap-2"
         >
-          <span className="text-xl">+</span>
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
           Add Class
         </button>
       </div>
