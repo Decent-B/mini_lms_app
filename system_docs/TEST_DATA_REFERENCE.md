@@ -34,7 +34,9 @@ Quick reference for all seeded test data. All accounts use password: `password12
 | Mia Wilson | mia.wilson@email.com | 2010-06-25 | Female | Grade 8 | Emily Wilson |
 | Lucas Martinez | lucas.martinez@email.com | 2012-12-01 | Male | Grade 6 | James Martinez |
 
-## 📚 Classes (20 total)
+## 📚 Classes (27 total)
+
+### Standard Classes (20)
 
 ### Monday
 | Time | Name | Subject | Teacher | Max |
@@ -75,6 +77,22 @@ Quick reference for all seeded test data. All accounts use password: `password12
 | 11:00-12:30 | Economics Basics | Economics | Mr. Thompson | 15 |
 | 14:00-15:30 | Robotics Club | Computer Science | Dr. Lee | 10 |
 | 16:00-17:30 | Photography | Art | Ms. Garcia | 12 |
+
+### Additional Classes with Overlapping Time Slots (7)
+
+**Purpose:** These classes test schedule conflict detection functionality.
+
+| Day | Time | Name | Subject | Teacher | Max |
+|-----|------|------|---------|---------|-----|
+| Monday | 09:30-11:00 | Algebra Workshop | Mathematics | Dr. Wilson | 10 |
+| Monday | 15:00-16:30 | Game Development | Computer Science | Mr. Parker | 10 |
+| Tuesday | 10:00-11:30 | Public Speaking | Communication | Mr. Johnson | 12 |
+| Wednesday | 13:30-15:00 | Digital Art | Art | Ms. Taylor | 10 |
+| Wednesday | 15:00-16:30 | Yoga & Wellness | PE | Ms. Kumar | 20 |
+| Thursday | 09:30-11:00 | Environmental Science | Science | Dr. Green | 12 |
+| Friday | 10:00-11:30 | French Language | French | Mme. Dubois | 15 |
+
+**Note:** These classes have overlapping time slots with standard classes (e.g., Algebra Workshop 09:30-11:00 overlaps with Mathematics Fundamentals 09:00-10:30). Students are registered to avoid conflicts.
 
 ## 🎫 Subscriptions by Student
 
@@ -145,6 +163,8 @@ Quick reference for all seeded test data. All accounts use password: `password12
 
 ## 📅 Class Schedules by Student
 
+**Total Registrations:** 101 across 10 students (no schedule conflicts)
+
 ### Emma Smith (4 classes)
 - Monday 09:00-10:30: Mathematics Fundamentals
 - Tuesday 11:00-12:30: History & Culture
@@ -205,16 +225,18 @@ Quick reference for all seeded test data. All accounts use password: `password12
 - Thursday 11:00-12:30: Spanish Language
 - Friday 11:00-12:30: Economics Basics
 
-## 📊 Statistics
+## 📊 Seed Data Statistics
 
 - **Total Users**: 18 (1 staff + 7 parents + 10 students)
-- **Total Classes**: 20 (4 per weekday)
+- **Total Classes**: 27 (20 standard + 7 with overlapping time slots)
 - **Total Subscriptions**: 25 (average 2.5 per student)
-- **Total Registrations**: 39 (average 3.9 per student)
+- **Total Registrations**: 101 (average 10.1 per student)
 - **Active Subscriptions**: 24 (1 expired)
 - **Total Available Sessions**: 574
 - **Total Used Sessions**: 155
 - **Remaining Sessions**: 419
+
+> **Note:** The actual database may contain additional records created during testing (e.g., via test_api.sh script or manual API calls). The statistics above reflect only the initial seed data.
 
 ## 🎓 Teachers
 
@@ -228,3 +250,10 @@ Quick reference for all seeded test data. All accounts use password: `password12
 | Dr. Lee | 3 | Computer Science |
 | Ms. Rodriguez | 2 | Music, Spanish |
 | Coach Miller | 1 | PE |
+| Dr. Wilson | 1 | Mathematics (Algebra Workshop) |
+| Mr. Parker | 1 | Computer Science (Game Development) |
+| Mr. Johnson | 1 | Communication (Public Speaking) |
+| Ms. Taylor | 1 | Art (Digital Art) |
+| Ms. Kumar | 1 | PE (Yoga & Wellness) |
+| Dr. Green | 1 | Science (Environmental Science) |
+| Mme. Dubois | 1 | French |
