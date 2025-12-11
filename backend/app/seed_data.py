@@ -11,6 +11,7 @@ This file contains manual entries for each record to ensure data quality.
 """
 
 from datetime import date, timedelta
+import os
 from sqlalchemy.orm import Session # pyright: ignore[reportUnusedImport]
 
 from app.core.database import SessionLocal, engine, Base
@@ -26,17 +27,27 @@ from app.models.subscription import Subscription
 def seed_database():
     """Seed the database with test data."""
     
-    # Create all tables
-    Base.metadata.create_all(bind=engine)
+    # Get environment from environment variable
+    environment = os.getenv('ENVIRONMENT', 'development').lower()
+    
+    # In development mode, drop all tables and recreate from scratch
+    if environment == 'development':
+        print("🔄 Development mode - resetting database...")
+        Base.metadata.drop_all(bind=engine)
+        print("✓ All tables dropped")
+        Base.metadata.create_all(bind=engine)
+        print("✓ Tables recreated")
     
     db = SessionLocal()
     
     try:
         # Check if data already exists
-        if db.query(User).count() > 0:
-            print("✓ Database already seeded. Skipping...")
+        user_count = db.query(User).count()
+        if user_count > 0:
+            print(f"✓ Database already contains {user_count} users. Skipping seed...")
             return
         
+        # Seed database with test data
         print("🌱 Seeding database with test data...")
         
         # Default password for all test accounts

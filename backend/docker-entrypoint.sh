@@ -17,7 +17,7 @@ done
 echo "✓ Database is ready"
 echo ""
 
-# Run database migrations
+# Run database migrations (always run migrations)
 echo "📦 Running database migrations..."
 alembic upgrade head
 echo "✓ Migrations complete"

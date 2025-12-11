@@ -206,6 +206,90 @@ cd backend
 pytest tests/ -v
 ```
 
+## 🔄 Database Management
+
+### Development Mode (Auto-Reset)
+
+When `ENVIRONMENT=development` in your `.env` file:
+- **Automatic**: Database tables are **dropped and recreated** on every backend restart
+- **Automatic**: Fresh test data is seeded every time
+- **Use case**: Local development, testing changes from scratch
+
+```bash
+# Start in development mode (default)
+docker-compose up -d
+
+# Restart to reset database
+docker-compose restart backend
+
+# Or force rebuild
+docker-compose down && docker-compose up --build -d
+```
+
+**What happens in development:**
+1. Backend starts
+2. All tables are **dropped** (⚠️ all data lost)
+3. Tables are recreated with latest schema
+4. Database is seeded with test data
+5. Application starts
+
+### Production Mode (Preserve Data)
+
+When `ENVIRONMENT=production` in your `.env` file:
+- **Safe**: Database is **never dropped automatically**
+- **Idempotent**: Seeding only runs if database is empty
+- **Use case**: Production, staging environments
+
+```bash
+# Set environment in .env
+ENVIRONMENT=production
+
+# Start application
+docker-compose up -d
+```
+
+**What happens in production:**
+1. Backend starts
+2. Tables are created **only if they don't exist**
+3. Seeding **skipped** if any users exist
+4. Application starts with existing data intact
+
+### Manual Database Operations
+
+```bash
+# Drop all data and reseed (development only)
+docker-compose restart backend
+
+# Run migrations manually
+docker-compose exec backend alembic upgrade head
+
+# Seed database manually
+docker-compose exec backend python -m app.seed_data
+
+# Access database directly
+docker-compose exec db psql -U lms_user -d mini_lms_db
+
+# Backup database
+docker-compose exec db pg_dump -U lms_user mini_lms_db > backup.sql
+
+# Restore database
+docker-compose exec -T db psql -U lms_user mini_lms_db < backup.sql
+```
+
+### Environment Configuration
+
+Edit your `.env` file:
+
+```bash
+# For local development (auto-reset)
+ENVIRONMENT=development
+
+# For production/staging (preserve data)
+ENVIRONMENT=production
+```
+
+⚠️ **Warning**: Never set `ENVIRONMENT=development` in production! All data will be lost on restart.
+
 ## 📝 API Documentation
 
 Once running, visit http://localhost:8000/docs for interactive API documentation.

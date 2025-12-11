@@ -579,16 +579,19 @@ const ClassesManagement = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Time Slot
+                    Time Slot *
                   </label>
                   <input
                     type="text"
+                    required
+                    pattern="^([0-1][0-9]|2[0-3]):[0-5][0-9]-([0-1][0-9]|2[0-3]):[0-5][0-9]$"
                     value={formData.time_slot}
                     onChange={(e) => setFormData({ ...formData, time_slot: e.target.value })}
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="09:00-10:30"
+                    title="Time slot must be in HH:MM-HH:MM format (e.g., 09:00-10:30)"
                   />
-                  <p className="mt-1 text-xs text-slate-500">Format: HH:MM-HH:MM</p>
+                  <p className="mt-1 text-xs text-slate-500">Format: HH:MM-HH:MM (required)</p>
                 </div>
 
                 <div>

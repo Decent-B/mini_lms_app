@@ -30,25 +30,33 @@ def create_class(db: Session, class_data: ClassCreate) -> ClassModel:
     Raises:
         HTTPException: If validation fails
     """
-    # Validate time slot format (HH:MM-HH:MM or HH:MM)
+    # Validate time slot format (HH:MM-HH:MM only)
     if class_data.time_slot:
         try:
-            if "-" in class_data.time_slot:
-                # Format: "09:00-10:30"
-                start_time, end_time = class_data.time_slot.split("-")
-                for time_part in [start_time.strip(), end_time.strip()]:
-                    hours, minutes = map(int, time_part.split(":"))
-                    if not (0 <= hours < 24 and 0 <= minutes < 60):
-                        raise ValueError
-            else:
-                # Format: "09:00"
-                hours, minutes = map(int, class_data.time_slot.split(":"))
+            if "-" not in class_data.time_slot:
+                raise ValueError("Time slot must contain a range with '-' separator")
+            
+            # Format: "09:00-10:30"
+            start_time, end_time = class_data.time_slot.split("-")
+            for time_part in [start_time.strip(), end_time.strip()]:
+                hours, minutes = map(int, time_part.split(":"))
                 if not (0 <= hours < 24 and 0 <= minutes < 60):
-                    raise ValueError
-        except (ValueError, AttributeError):
+                    raise ValueError("Invalid time values")
+            
+            # Validate that end time is after start time
+            start_hours, start_minutes = map(int, start_time.strip().split(":"))
+            end_hours, end_minutes = map(int, end_time.strip().split(":"))
+            start_total_minutes = start_hours * 60 + start_minutes
+            end_total_minutes = end_hours * 60 + end_minutes
+            
+            if end_total_minutes <= start_total_minutes:
+                raise ValueError("End time must be after start time")
+                
+        except (ValueError, AttributeError) as e:
+            error_msg = str(e) if "must" in str(e) else "Invalid time_slot format"
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid time_slot format. Use 'HH:MM-HH:MM' (e.g., '09:00-10:30') or 'HH:MM'"
+                detail=f"{error_msg}. Use 'HH:MM-HH:MM' format (e.g., '09:00-10:30')"
             )
     
     try:

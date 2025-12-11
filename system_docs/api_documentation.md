@@ -435,7 +435,7 @@ curl http://localhost:8000/api/students/1
 | `name` | string | Yes | min: 1, max: 255 | Class name |
 | `subject` | string | No | max: 255 | Subject/topic |
 | `day_of_week` | string | No | max: 20 | Day class meets (e.g., "Monday") |
-| `time_slot` | string | No | HH:MM-HH:MM or HH:MM format, max: 50 | Time range (e.g., "09:00-10:30") |
+| `time_slot` | string | No | HH:MM-HH:MM format only, max: 50 | Time range (e.g., "09:00-10:30") |
 | `teacher_name` | string | No | max: 255 | Instructor name |
 | `max_students` | integer | No | >= 1 | Maximum enrollment |
 
@@ -482,25 +482,28 @@ curl -X POST http://localhost:8000/api/classes \
 
 | Status Code | Condition | Response Example |
 |-------------|-----------|------------------|
-| 400 | Invalid time_slot format | `{"detail": "Invalid time_slot format. Use 'HH:MM-HH:MM' (e.g., '09:00-10:30') or 'HH:MM'"}` |
-| 400 | Invalid time values | `{"detail": "Invalid time_slot format. Use 'HH:MM-HH:MM' (e.g., '09:00-10:30') or 'HH:MM'"}` |
+| 400 | Invalid time_slot format | `{"detail": "Invalid time_slot format. Use 'HH:MM-HH:MM' format (e.g., '09:00-10:30')"}` |
+| 400 | Invalid time values | `{"detail": "Invalid time values. Use 'HH:MM-HH:MM' format (e.g., '09:00-10:30')"}` |
+| 400 | End time before start | `{"detail": "End time must be after start time. Use 'HH:MM-HH:MM' format (e.g., '09:00-10:30')"}` |
 | 422 | Missing name | `{"detail": [{"type": "missing", "loc": ["body", "name"], "msg": "Field required"}]}` |
 
 **Constraints:**
 - `name` is required and cannot be empty
-- `time_slot` must be in valid format:
-  - Range: "HH:MM-HH:MM" (e.g., "09:00-10:30")
-  - Single: "HH:MM" (e.g., "14:00")
-  - Hours: 0-23, Minutes: 0-59
+- `time_slot` must be in valid HH:MM-HH:MM format:
+  - Time range: `"HH:MM-HH:MM"` (e.g., `"09:00-10:30"`)
+  - End time must be after start time
+  - Hours must be 0-23, minutes must be 0-59
 - `max_students` must be at least 1 if provided
 - All other fields are optional
 
 **Valid time_slot examples:**
-- ✅ `"09:00-10:30"` - Range format
-- ✅ `"14:00"` - Single time
-- ❌ `"25:00-26:30"` - Invalid hours
+- ✅ `"09:00-10:30"` - Valid range (1.5 hours)
+- ✅ `"14:00-15:30"` - Valid range (1.5 hours)
+- ✅ `"08:00-09:00"` - Valid range (1 hour)
+- ❌ `"09:00"` - Missing end time (not allowed)
+- ❌ `"10:30-09:00"` - End time before start time
+- ❌ `"25:00-26:00"` - Invalid hours
 - ❌ `"09:00-"` - Incomplete range
-- ❌ `"9:0"` - Missing leading zeros
 
 ---
 
